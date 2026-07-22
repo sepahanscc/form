@@ -235,18 +235,18 @@
 
         // ===== LOGIN =====
         function doLogin() {
-            const name = document.getElementById('evaluator-name').value.trim();
-            const code = document.getElementById('access-code').value.trim().toUpperCase();
+            var name = document.getElementById('evaluator-name').value.trim();
+            var code = document.getElementById('access-code').value.trim().toUpperCase();
             
-            console.log('نام:', name);
-            console.log('کد:', code);
+            // Clear previous error
+            document.getElementById('login-err').innerHTML = '';
             
             if (!name) {
                 showLoginErr('نام ارزیاب را وارد کنید');
                 return;
             }
             if (!CODES[code]) {
-                showLoginErr('کد دسترسی نامعتبر است');
+                showLoginErr('کد دسترسی نامعتبر است. کدهای معتبر: SP001 تا SP004');
                 return;
             }
             
@@ -257,54 +257,66 @@
         }
 
         function showLoginErr(msg) {
-            document.getElementById('login-err').innerHTML = `<div class="alert alert-err">${msg}</div>`;
+            document.getElementById('login-err').innerHTML = '<div class="alert alert-err">' + msg + '</div>';
         }
 
         // ===== BUILD CRITERIA =====
         function buildCriteria(containerId, key) {
-            const el = document.getElementById(containerId);
-            CRITERIA[key].forEach((label, i) => {
-                const name = `${key}_${i}`;
-                let stars = '';
-                for (let v = 5; v >= 1; v--) {
-                    stars += `<input type="radio" name="${name}" id="${name}_${v}" value="${v}">
-                              <label for="${name}_${v}">${v}</label>`;
+            var el = document.getElementById(containerId);
+            for (var i = 0; i < CRITERIA[key].length; i++) {
+                var label = CRITERIA[key][i];
+                var name = key + '_' + i;
+                var stars = '';
+                for (var v = 5; v >= 1; v--) {
+                    stars += '<input type="radio" name="' + name + '" id="' + name + '_' + v + '" value="' + v + '">';
+                    stars += '<label for="' + name + '_' + v + '">' + v + '</label>';
                 }
-                el.innerHTML += `<div class="criteria-row">
-                    <span class="criteria-label">${label}</span>
-                    <div class="stars">${stars}</div>
-                </div>`;
-            });
+                el.innerHTML += '<div class="criteria-row">';
+                el.innerHTML += '<span class="criteria-label">' + label + '</span>';
+                el.innerHTML += '<div class="stars">' + stars + '</div>';
+                el.innerHTML += '</div>';
+            }
         }
 
         // ===== CALCULATE =====
         function getGroupAvg(key) {
-            const vals = [];
-            CRITERIA[key].forEach((_, i) => {
-                const el = document.querySelector(`input[name="${key}_${i}"]:checked`);
-                if (el) vals.push(+el.value);
-            });
-            if (!vals.length) return null;
-            return vals.reduce((a, b) => a + b, 0) / vals.length;
+            var vals = [];
+            for (var i = 0; i < CRITERIA[key].length; i++) {
+                var el = document.querySelector('input[name="' + key + '_' + i + '"]:checked');
+                if (el) vals.push(parseFloat(el.value));
+            }
+            if (vals.length === 0) return null;
+            var sum = 0;
+            for (var j = 0; j < vals.length; j++) {
+                sum += vals[j];
+            }
+            return sum / vals.length;
         }
 
         function calculate() {
-            const name = document.getElementById('f-name').value.trim();
+            var name = document.getElementById('f-name').value.trim();
             if (!name) {
                 alert('نام بازیکن را وارد کنید');
                 return;
             }
 
-            const avgs = {};
-            for (const key of Object.keys(CRITERIA)) {
+            var avgs = {};
+            var keys = Object.keys(CRITERIA);
+            for (var k = 0; k < keys.length; k++) {
+                var key = keys[k];
                 avgs[key] = getGroupAvg(key);
                 if (avgs[key] === null) {
-                    alert(`لطفاً همه معیارهای ${key} را امتیاز دهید`);
+                    alert('لطفاً همه معیارهای ' + key + ' را امتیاز دهید');
                     return;
                 }
             }
 
-            const total = Object.keys(WEIGHTS).reduce((sum, k) => sum + (avgs[k] / 5) * WEIGHTS[k], 0);
+            var total = 0;
+            var weightKeys = Object.keys(WEIGHTS);
+            for (var w = 0; w < weightKeys.length; w++) {
+                var wk = weightKeys[w];
+                total += (avgs[wk] / 5) * WEIGHTS[wk];
+            }
 
             currentData = {
                 id: document.getElementById('f-id').value || '—',
@@ -325,41 +337,54 @@
             document.getElementById('tab-dash').style.display = 'inline-block';
             showTab('dashboard');
 
-            document.getElementById('dash-info').innerHTML = `
-                <span>👤 ${d.name}</span>
-                <span>🆔 ${d.id}</span>
-                <span>📅 ${d.date}</span>
-                <span>🏷 ${d.age}</span>
-                <span>📍 ${d.pos}</span>
-            `;
-
-            const status = d.total >= 80 ? ['نخبه', 'elite'] : 
-                          d.total >= 65 ? ['خوب', 'good'] : 
-                          d.total >= 50 ? ['متوسط', 'avg'] : ['ضعیف', 'weak'];
-            const labels = { intel: 'هوش', tech: 'تکنیک', tact: 'تاکتیک', phys: 'جسمانی', stat: 'آماری' };
-
-            let grid = '';
-            for (const [k, lbl] of Object.entries(labels)) {
-                const pct = ((d.avgs[k] / 5) * 100).toFixed(1);
-                grid += `<div class="score-box"><div class="val">${pct}</div><div class="lbl">${lbl}</div></div>`;
+            var statusText = '';
+            var statusClass = '';
+            if (d.total >= 80) {
+                statusText = 'نخبه';
+                statusClass = 'elite';
+            } else if (d.total >= 65) {
+                statusText = 'خوب';
+                statusClass = 'good';
+            } else if (d.total >= 50) {
+                statusText = 'متوسط';
+                statusClass = 'avg';
+            } else {
+                statusText = 'ضعیف';
+                statusClass = 'weak';
             }
-            grid += `<div class="score-box score-total"><div class="val">${d.total.toFixed(1)}</div><div class="lbl">نمره کل / ۱۰۰</div></div>`;
-            grid += `<div class="score-box"><div class="val" style="font-size:1rem;padding-top:8px"><span class="status-badge status-${status[1]}">${status[0]}</span></div><div class="lbl">وضعیت</div></div>`;
+
+            var labels = { intel: 'هوش', tech: 'تکنیک', tact: 'تاکتیک', phys: 'جسمانی', stat: 'آماری' };
+
+            var grid = '';
+            var labelKeys = Object.keys(labels);
+            for (var l = 0; l < labelKeys.length; l++) {
+                var k = labelKeys[l];
+                var pct = ((d.avgs[k] / 5) * 100).toFixed(1);
+                grid += '<div class="score-box"><div class="val">' + pct + '</div><div class="lbl">' + labels[k] + '</div></div>';
+            }
+            grid += '<div class="score-box score-total"><div class="val">' + d.total.toFixed(1) + '</div><div class="lbl">نمره کل / ۱۰۰</div></div>';
+            grid += '<div class="score-box"><div class="val" style="font-size:1rem;padding-top:8px"><span class="status-badge status-' + statusClass + '">' + statusText + '</span></div><div class="lbl">وضعیت</div></div>';
             document.getElementById('score-grid').innerHTML = grid;
 
-            document.getElementById('video-link').innerHTML = d.video
-                ? `<a href="${d.video}" target="_blank" style="color:#58a6ff;font-size:0.85rem">🎬 مشاهده ویدیو</a>` : '';
+            var videoHtml = '';
+            if (d.video) {
+                videoHtml = '<a href="' + d.video + '" target="_blank" style="color:#58a6ff;font-size:0.85rem">🎬 مشاهده ویدیو</a>';
+            }
+            document.getElementById('video-link').innerHTML = videoHtml;
 
             drawChart('radar', d);
         }
 
         function drawChart(type, d) {
-            const labels = ['هوش', 'تکنیک', 'تاکتیک', 'جسمانی', 'آماری'];
-            const keys = ['intel', 'tech', 'tact', 'phys', 'stat'];
-            const data = keys.map(k => +((d.avgs[k] / 5) * 100).toFixed(1));
+            var labels = ['هوش', 'تکنیک', 'تاکتیک', 'جسمانی', 'آماری'];
+            var keys = ['intel', 'tech', 'tact', 'phys', 'stat'];
+            var data = [];
+            for (var i = 0; i < keys.length; i++) {
+                data.push(parseFloat(((d.avgs[keys[i]] / 5) * 100).toFixed(1)));
+            }
 
             if (chartInstance) chartInstance.destroy();
-            const ctx = document.getElementById('myChart').getContext('2d');
+            var ctx = document.getElementById('myChart').getContext('2d');
 
             if (type === 'radar') {
                 chartInstance = new Chart(ctx, {
@@ -416,37 +441,48 @@
         }
 
         function switchChart(type) {
-            document.querySelectorAll('.tabs .tab').forEach((t, i) => {
-                t.classList.toggle('active', i === (type === 'radar' ? 0 : 1));
-            });
+            var tabs = document.querySelectorAll('.tabs .tab');
+            var isRadar = (type === 'radar');
+            for (var i = 0; i < tabs.length; i++) {
+                if (i === 0 && isRadar) {
+                    tabs[i].classList.add('active');
+                } else if (i === 1 && !isRadar) {
+                    tabs[i].classList.add('active');
+                } else {
+                    tabs[i].classList.remove('active');
+                }
+            }
             if (currentData) drawChart(type, currentData);
         }
 
         // ===== EXCEL =====
         function loadExcel(input) {
-            const file = input.files[0];
+            var file = input.files[0];
             if (!file) return;
-            const reader = new FileReader();
+            var reader = new FileReader();
             reader.onload = function(e) {
                 try {
-                    const wb = XLSX.read(e.target.result, { type: 'array' });
-                    const ws = wb.Sheets['Scores'];
+                    var wb = XLSX.read(e.target.result, { type: 'array' });
+                    var ws = wb.Sheets['Scores'];
                     if (!ws) { 
                         showExcelMsg('شیت Scores یافت نشد', true); 
                         return; 
                     }
-                    const rows = XLSX.utils.sheet_to_json(ws);
+                    var rows = XLSX.utils.sheet_to_json(ws);
                     if (!rows.length) { 
                         showExcelMsg('داده‌ای یافت نشد', true); 
                         return; 
                     }
                     excelRows = rows;
-                    const sel = document.getElementById('player-select');
-                    sel.innerHTML = rows.map((r, i) => 
-                        `<option value="${i}">${r['نام و نام خانوادگی'] || 'بازیکن ' + (i+1)}</option>`
-                    ).join('');
+                    var sel = document.getElementById('player-select');
+                    var options = '';
+                    for (var i = 0; i < rows.length; i++) {
+                        var name = rows[i]['نام و نام خانوادگی'] || 'بازیکن ' + (i+1);
+                        options += '<option value="' + i + '">' + name + '</option>';
+                    }
+                    sel.innerHTML = options;
                     document.getElementById('player-select-wrap').style.display = 'block';
-                    showExcelMsg(`✅ ${rows.length} بازیکن بارگذاری شد`, false);
+                    showExcelMsg('✅ ' + rows.length + ' بازیکن بارگذاری شد', false);
                     showPlayerFromExcel();
                 } catch(err) { 
                     showExcelMsg('خطا در خواندن فایل: ' + err.message, true); 
@@ -456,15 +492,16 @@
         }
 
         function showExcelMsg(msg, isErr) {
-            document.getElementById('excel-msg').innerHTML = `<div class="alert ${isErr ? 'alert-err' : 'alert-ok'}">${msg}</div>`;
+            var className = isErr ? 'alert-err' : 'alert-ok';
+            document.getElementById('excel-msg').innerHTML = '<div class="alert ' + className + '">' + msg + '</div>';
         }
 
         function showPlayerFromExcel() {
-            const idx = +document.getElementById('player-select').value;
-            const r = excelRows[idx];
+            var idx = parseInt(document.getElementById('player-select').value);
+            var r = excelRows[idx];
             if (!r) return;
 
-            const colMap = {
+            var colMap = {
                 intel: ['هوش 1.1','هوش 1.2','هوش 1.3','هوش 1.4','هوش 1.5','هوش 1.6'],
                 tech:  ['تکنیک 2.1','تکنیک 2.2','تکنیک 2.3','تکنیک 2.4','تکنیک 2.5','تکنیک 2.6'],
                 tact:  ['تاکتیک 3.1','تاکتیک 3.2','تاکتیک 3.3','تاکتیک 3.4','تاکتیک 3.5'],
@@ -472,13 +509,25 @@
                 stat:  ['آماری 5.1','آماری 5.2','آماری 5.3','آماری 5.4','آماری 5.5']
             };
 
-            const avgs = {};
-            for (const [key, cols] of Object.entries(colMap)) {
-                const vals = cols.map(c => +r[c]).filter(v => v >= 1 && v <= 5);
-                avgs[key] = vals.length ? vals.reduce((a, b) => a + b, 0) / vals.length : 0;
+            var avgs = {};
+            var mapKeys = Object.keys(colMap);
+            for (var m = 0; m < mapKeys.length; m++) {
+                var key = mapKeys[m];
+                var cols = colMap[key];
+                var vals = [];
+                for (var c = 0; c < cols.length; c++) {
+                    var val = parseFloat(r[cols[c]]);
+                    if (val >= 1 && val <= 5) vals.push(val);
+                }
+                avgs[key] = vals.length ? vals.reduce(function(a, b) { return a + b; }, 0) / vals.length : 0;
             }
 
-            const total = Object.keys(WEIGHTS).reduce((sum, k) => sum + (avgs[k] / 5) * WEIGHTS[k], 0);
+            var total = 0;
+            var weightKeys = Object.keys(WEIGHTS);
+            for (var w = 0; w < weightKeys.length; w++) {
+                var wk = weightKeys[w];
+                total += (avgs[wk] / 5) * WEIGHTS[wk];
+            }
 
             currentData = {
                 id: r['شناسه بازیکن'] || '—',
@@ -495,17 +544,28 @@
 
         // ===== TABS =====
         function showTab(name) {
-            ['manual','excel','dashboard'].forEach(t => {
-                document.getElementById(`tab-${t}`).style.display = t === name ? 'block' : 'none';
-            });
-            document.querySelectorAll('.tabs .tab').forEach((el, i) => {
-                el.classList.toggle('active', ['manual','excel','dashboard'][i] === name);
-            });
+            var tabs = ['manual', 'excel', 'dashboard'];
+            for (var i = 0; i < tabs.length; i++) {
+                var el = document.getElementById('tab-' + tabs[i]);
+                if (tabs[i] === name) {
+                    el.style.display = 'block';
+                } else {
+                    el.style.display = 'none';
+                }
+            }
+            var tabElements = document.querySelectorAll('.tabs .tab');
+            for (var j = 0; j < tabElements.length; j++) {
+                if (tabs[j] === name) {
+                    tabElements[j].classList.add('active');
+                } else {
+                    tabElements[j].classList.remove('active');
+                }
+            }
         }
 
         // ===== SEND TO GOOGLE SHEET =====
         function sendToGoogleSheet(data) {
-            const url = "https://script.google.com/macros/s/AKfycbxPiQ-BXrvastNX6Bjpq86KjwaFg-aPNYAq5UdFB6r0qa18BMIrj8YWNkaQz6B8pO5-/exec";
+            var url = "https://script.google.com/macros/s/AKfycbxPiQ-BXrvastNX6Bjpq86KjwaFg-aPNYAq5UdFB6r0qa18BMIrj8YWNkaQz6B8pO5-/exec";
             
             fetch(url, {
                 method: "POST",
@@ -527,10 +587,10 @@
                     video: data.video
                 })
             })
-            .then(() => {
+            .then(function() {
                 alert("✅ ارزیابی ذخیره شد");
             })
-            .catch(error => {
+            .catch(function(error) {
                 alert("خطا در ارسال اطلاعات");
                 console.log(error);
             });
@@ -543,7 +603,7 @@
         buildCriteria('criteria-phys', 'phys');
         buildCriteria('criteria-stat', 'stat');
 
-        // برای دیباگ - در کنسول نشان می‌دهد که کدها چیست
+        console.log('سیستم آماده است!');
         console.log('کدهای معتبر:', Object.keys(CODES));
     </script>
 </body>
