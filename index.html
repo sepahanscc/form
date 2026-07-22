@@ -3,502 +3,767 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>⚽ سیستم ارزیابی بازیکنان — آکادمی سپاهان</title>
-    <!-- Chart.js & SheetJS -->
+    <title>سیستم ارزیابی بازیکنان</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
     <style>
-        @font-face {
-            font-family: 'IRANSans';
-            src: url('IRANSansWeb(FaNum)_Bold.ttf') format('truetype');
-            font-weight: bold;
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
         }
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body, * {
-            font-family: 'IRANSans', Tahoma, sans-serif !important;
+        body {
+            font-family: Tahoma, sans-serif;
+            background: #0d1117;
+            color: #e6edf3;
+            min-height: 100vh;
+            padding: 20px;
         }
-        body { background: #0d1117; color: #e6edf3; min-height: 100vh; }
-        .container { max-width: 960px; margin: 0 auto; padding: 20px; }
-        h1 { text-align: center; color: #58a6ff; margin-bottom: 24px; font-size: 1.4rem; }
-        .card { background: #161b22; border: 1px solid #30363d; border-radius: 10px; padding: 20px; margin-bottom: 20px; }
-        .card h2 { color: #58a6ff; margin-bottom: 16px; font-size: 1rem; }
-        label { display: block; margin-bottom: 6px; font-size: 0.85rem; color: #8b949e; }
-        input, select { width: 100%; padding: 8px 12px; background: #0d1117; border: 1px solid #30363d; border-radius: 6px; color: #e6edf3; font-family: Tahoma, sans-serif; font-size: 0.9rem; }
-        input:focus, select:focus { outline: none; border-color: #58a6ff; }
-        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-        .btn { padding: 10px 24px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; }
-        .btn-primary { background: #238636; color: #fff; }
-        .btn-secondary { background: #1f6feb; color: #fff; }
-        .btn:hover { opacity: 0.85; }
-        .section-title { color: #f0883e; font-size: 0.95rem; font-weight: bold; margin: 16px 0 10px; border-bottom: 1px solid #30363d; padding-bottom: 6px; }
-        .criteria-row { display: flex; align-items: center; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #21262d; }
-        .criteria-label { font-size: 0.85rem; color: #c9d1d9; flex: 1; }
-        .stars { display: flex; gap: 6px; flex-direction: row-reverse; }
-        .stars input[type=radio] { display: none; }
-        .stars label { width: 28px; height: 28px; background: #21262d; border-radius: 4px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 0.8rem; color: #8b949e; margin: 0; }
-        .stars input[type=radio]:checked + label,
-        .stars input[type=radio]:checked ~ label { background: #1f6feb; color: #fff; }
-        .stars label:hover { background: #1f6feb; color: #fff; }
-        #dashboard { display: none; }
-        .score-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px; }
-        .score-box { background: #0d1117; border: 1px solid #30363d; border-radius: 8px; padding: 14px; text-align: center; }
-        .score-box .val { font-size: 1.8rem; font-weight: bold; color: #58a6ff; }
-        .score-box .lbl { font-size: 0.75rem; color: #8b949e; margin-top: 4px; }
-        .score-total .val { color: #3fb950; font-size: 2.2rem; }
-        .status-badge { display: inline-block; padding: 4px 14px; border-radius: 20px; font-size: 0.85rem; font-weight: bold; }
-        .status-elite { background: #1a4731; color: #3fb950; }
-        .status-good { background: #1c3a5e; color: #58a6ff; }
-        .status-avg { background: #3d2b00; color: #d29922; }
-        .status-weak { background: #3d1a1a; color: #f85149; }
-        .chart-wrap { position: relative; height: 320px; }
-        .tabs { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
-        .tab { padding: 6px 16px; border-radius: 6px; cursor: pointer; font-size: 0.85rem; background: #21262d; color: #8b949e; border: 1px solid #30363d; }
-        .tab.active { background: #1f6feb; color: #fff; border-color: #1f6feb; }
-        #excel-section input[type=file] { display: none; }
-        .file-btn { display: inline-block; padding: 8px 20px; background: #21262d; border: 1px dashed #58a6ff; border-radius: 6px; cursor: pointer; color: #58a6ff; font-size: 0.85rem; }
-        .alert { padding: 10px 14px; border-radius: 6px; font-size: 0.85rem; margin-top: 10px; }
-        .alert-err { background: #3d1a1a; color: #f85149; border: 1px solid #f85149; }
-        .alert-ok { background: #1a4731; color: #3fb950; border: 1px solid #3fb950; }
-        #login-screen { max-width: 400px; margin: 80px auto; }
-        #login-screen .card { text-align: center; }
-        #login-screen h2 { font-size: 1.2rem; margin-bottom: 20px; }
-        #login-screen input { margin-bottom: 12px; }
-        #app { display: none; }
-        .player-info { display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 16px; }
-        .player-info span { background: #21262d; padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; }
-        @media(max-width:600px) { .grid-2,.score-grid { grid-template-columns: 1fr 1fr; } }
+        .container {
+            max-width: 960px;
+            margin: 0 auto;
+        }
         .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .header h1 {
+            color: #58a6ff;
+            font-size: 1.8rem;
+        }
+        .card {
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .card h2 {
+            color: #58a6ff;
+            margin-bottom: 16px;
+            font-size: 1.2rem;
+        }
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-size: 0.85rem;
+            color: #8b949e;
+        }
+        input, select {
             width: 100%;
+            padding: 8px 12px;
+            background: #0d1117;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            color: #e6edf3;
+            font-size: 0.9rem;
+            margin-bottom: 10px;
+        }
+        input:focus, select:focus {
+            outline: none;
+            border-color: #58a6ff;
+        }
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+        }
+        .btn {
+            padding: 10px 24px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+        .btn-primary {
+            background: #238636;
+            color: #fff;
+        }
+        .btn-secondary {
+            background: #1f6feb;
+            color: #fff;
+        }
+        .btn:hover {
+            opacity: 0.85;
+        }
+        .section-title {
+            color: #f0883e;
+            font-size: 0.95rem;
+            font-weight: bold;
+            margin: 16px 0 10px;
+            border-bottom: 1px solid #30363d;
+            padding-bottom: 6px;
+        }
+        .criteria-row {
             display: flex;
-            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #21262d;
+        }
+        .criteria-label {
+            font-size: 0.85rem;
+            color: #c9d1d9;
+            flex: 1;
+        }
+        .stars {
+            display: flex;
+            gap: 6px;
+            flex-direction: row-reverse;
+        }
+        .stars input[type=radio] {
+            display: none;
+        }
+        .stars label {
+            width: 28px;
+            height: 28px;
+            background: #21262d;
+            border-radius: 4px;
+            display: flex;
             align-items: center;
             justify-content: center;
+            cursor: pointer;
+            font-size: 0.8rem;
+            color: #8b949e;
+            margin: 0;
+        }
+        .stars input[type=radio]:checked + label,
+        .stars input[type=radio]:checked ~ label {
+            background: #1f6feb;
+            color: #fff;
+        }
+        .stars label:hover {
+            background: #1f6feb;
+            color: #fff;
+        }
+        .score-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        .score-box {
+            background: #0d1117;
+            border: 1px solid #30363d;
+            border-radius: 8px;
+            padding: 14px;
             text-align: center;
-            margin: 30px auto;
         }
-        .sepahan-logo {
-            width: 90px;
-            height: auto;
-            margin-bottom: 15px;
+        .score-box .val {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #58a6ff;
         }
-        .header h1 { margin: 0; text-align: center; }
+        .score-box .lbl {
+            font-size: 0.75rem;
+            color: #8b949e;
+            margin-top: 4px;
+        }
+        .score-total .val {
+            color: #3fb950;
+            font-size: 2.2rem;
+        }
+        .status-badge {
+            display: inline-block;
+            padding: 4px 14px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: bold;
+        }
+        .status-elite {
+            background: #1a4731;
+            color: #3fb950;
+        }
+        .status-good {
+            background: #1c3a5e;
+            color: #58a6ff;
+        }
+        .status-avg {
+            background: #3d2b00;
+            color: #d29922;
+        }
+        .status-weak {
+            background: #3d1a1a;
+            color: #f85149;
+        }
+        .chart-wrap {
+            position: relative;
+            height: 320px;
+        }
+        .tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+        }
+        .tab {
+            padding: 6px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            background: #21262d;
+            color: #8b949e;
+            border: 1px solid #30363d;
+        }
+        .tab.active {
+            background: #1f6feb;
+            color: #fff;
+            border-color: #1f6feb;
+        }
+        .file-btn {
+            display: inline-block;
+            padding: 8px 20px;
+            background: #21262d;
+            border: 1px dashed #58a6ff;
+            border-radius: 6px;
+            cursor: pointer;
+            color: #58a6ff;
+            font-size: 0.85rem;
+        }
+        #excel-section input[type=file] {
+            display: none;
+        }
+        .alert {
+            padding: 10px 14px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            margin-top: 10px;
+        }
+        .alert-err {
+            background: #3d1a1a;
+            color: #f85149;
+            border: 1px solid #f85149;
+        }
+        .alert-ok {
+            background: #1a4731;
+            color: #3fb950;
+            border: 1px solid #3fb950;
+        }
+        #login-screen {
+            max-width: 400px;
+            margin: 80px auto;
+        }
+        #login-screen .card {
+            text-align: center;
+        }
+        #login-screen h2 {
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+        }
+        #login-screen input {
+            margin-bottom: 12px;
+        }
+        #app {
+            display: none;
+        }
+        .player-info {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+            margin-bottom: 16px;
+        }
+        .player-info span {
+            background: #21262d;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+        }
+        @media(max-width:600px) {
+            .grid-2,
+            .score-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
     </style>
 </head>
 <body>
-<div class="header">
-    <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='45' fill='%23f0883e'/%3E%3Ctext x='50' y='68' font-size='40' text-anchor='middle' fill='white' font-family='sans-serif'%3Eس%3C/text%3E%3C/svg%3E" alt="Sepahan Logo" class="sepahan-logo">
-    <h1 style="color:#58a6ff;">آکادمی سپاهان · ارزیابی بازیکنان</h1>
-</div>
 
-<!-- LOGIN -->
-<div id="login-screen">
-    <div class="card">
-        <h2>🔐 ورود به سیستم ارزیابی</h2>
-        <label>نام ارزیاب</label>
-        <input id="evaluator-name" type="text" placeholder="نام و نام خانوادگی">
-        <label>کد دسترسی</label>
-        <input id="access-code" type="password" placeholder="SP001 تا SP004">
-        <br>
-        <button class="btn btn-primary" onclick="doLogin()" style="width:100%">ورود</button>
-        <div id="login-err"></div>
-    </div>
-</div>
+    <div class="container">
+        <div class="header">
+            <h1>⚽ آکادمی سپاهان - ارزیابی بازیکنان</h1>
+        </div>
 
-<!-- APP -->
-<div id="app">
-<div class="container">
+        <!-- LOGIN -->
+        <div id="login-screen">
+            <div class="card">
+                <h2>🔐 ورود به سیستم</h2>
+                <label>نام ارزیاب</label>
+                <input id="evaluator-name" type="text" placeholder="نام و نام خانوادگی">
+                <label>کد دسترسی</label>
+                <input id="access-code" type="password" placeholder="SP001 تا SP004">
+                <button class="btn btn-primary" onclick="doLogin()" style="width:100%;margin-top:10px;">ورود</button>
+                <div id="login-err" style="margin-top:10px;"></div>
+            </div>
+        </div>
 
-    <!-- TABS -->
-    <div class="tabs">
-        <div class="tab active" onclick="showTab('manual')">ورود دستی</div>
-        <div class="tab" onclick="showTab('excel')">بارگذاری اکسل</div>
-        <div class="tab" onclick="showTab('dashboard')" id="tab-dash" style="display:none">داشبورد</div>
-    </div>
+        <!-- APP -->
+        <div id="app">
+            <!-- TABS -->
+            <div class="tabs">
+                <div class="tab active" onclick="showTab('manual')">ورود دستی</div>
+                <div class="tab" onclick="showTab('excel')">بارگذاری اکسل</div>
+                <div class="tab" onclick="showTab('dashboard')" id="tab-dash" style="display:none">داشبورد</div>
+            </div>
 
-    <!-- MANUAL FORM -->
-    <div id="tab-manual">
-        <div class="card">
-            <h2>اطلاعات بازیکن</h2>
-            <div class="grid-2">
-                <div><label>شناسه بازیکن</label><input id="f-id" type="text" placeholder="مثال: SP-001"></div>
-                <div><label>نام و نام خانوادگی</label><input id="f-name" type="text" placeholder="نام کامل"></div>
-                <div>
-                    <label>رده سنی</label>
-                    <select id="f-age">
-                        <option>U9</option><option>U10</option><option>U11</option><option>U12</option>
-                        <option>U13</option><option>U14</option><option selected>U15</option><option>U16</option>
-                        <option>U17</option><option>U18</option>
-                    </select>
+            <!-- MANUAL FORM -->
+            <div id="tab-manual">
+                <div class="card">
+                    <h2>اطلاعات بازیکن</h2>
+                    <div class="grid-2">
+                        <div>
+                            <label>شناسه بازیکن</label>
+                            <input id="f-id" type="text" placeholder="مثال: SP-001">
+                        </div>
+                        <div>
+                            <label>نام و نام خانوادگی</label>
+                            <input id="f-name" type="text" placeholder="نام کامل">
+                        </div>
+                        <div>
+                            <label>رده سنی</label>
+                            <select id="f-age">
+                                <option>U9</option>
+                                <option>U10</option>
+                                <option>U11</option>
+                                <option>U12</option>
+                                <option>U13</option>
+                                <option>U14</option>
+                                <option selected>U15</option>
+                                <option>U16</option>
+                                <option>U17</option>
+                                <option>U18</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label>پست بازی</label>
+                            <select id="f-pos">
+                                <option>دروازه‌بان</option>
+                                <option>مدافع راست</option>
+                                <option>مدافع چپ</option>
+                                <option>مدافع وسط</option>
+                                <option>هافبک دفاعی</option>
+                                <option selected>هافبک مرکزی</option>
+                                <option>هافبک تهاجمی</option>
+                                <option>وینگر راست</option>
+                                <option>وینگر چپ</option>
+                                <option>مهاجم</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label>تاریخ ارزیابی</label>
+                            <input id="f-date" type="date">
+                        </div>
+                        <div>
+                            <label>لینک ویدیو (اختیاری)</label>
+                            <input id="f-video" type="url" placeholder="https://...">
+                        </div>
+                    </div>
                 </div>
-                <div>
-                    <label>پست بازی</label>
-                    <select id="f-pos">
-                        <option>دروازه‌بان</option><option>مدافع راست</option><option>مدافع چپ</option>
-                        <option>مدافع وسط</option><option>هافبک دفاعی</option><option selected>هافبک مرکزی</option>
-                        <option>هافبک تهاجمی</option><option>وینگر راست</option><option>وینگر چپ</option>
-                        <option>مهاجم</option>
-                    </select>
+
+                <div class="card">
+                    <h2>معیارهای ارزیابی <small style="color:#8b949e;font-weight:normal">(امتیاز ۱ تا ۵)</small></h2>
+                    <div class="section-title">🧠 هوش — وزن ۳۰٪</div>
+                    <div id="criteria-intel"></div>
+                    <div class="section-title">⚽ تکنیک — وزن ۲۵٪</div>
+                    <div id="criteria-tech"></div>
+                    <div class="section-title">🎯 تاکتیک — وزن ۲۵٪</div>
+                    <div id="criteria-tact"></div>
+                    <div class="section-title">💪 جسمانی — وزن ۱۰٪</div>
+                    <div id="criteria-phys"></div>
+                    <div class="section-title">📊 آماری — وزن ۱۰٪</div>
+                    <div id="criteria-stat"></div>
+                    <br>
+                    <button class="btn btn-primary" onclick="calculate()">محاسبه و نمایش داشبورد</button>
                 </div>
-                <div><label>تاریخ ارزیابی</label><input id="f-date" type="date"></div>
-                <div><label>لینک ویدیو (اختیاری)</label><input id="f-video" type="url" placeholder="https://drive.google.com/..."></div>
             </div>
-        </div>
 
-        <div class="card">
-            <h2>معیارهای ارزیابی <small style="color:#8b949e;font-weight:normal">(امتیاز ۱ تا ۵)</small></h2>
-            <div class="section-title">🧠 هوش — وزن ۳۰٪</div>
-            <div id="criteria-intel"></div>
-            <div class="section-title">⚽ تکنیک — وزن ۲۵٪</div>
-            <div id="criteria-tech"></div>
-            <div class="section-title">🎯 تاکتیک — وزن ۲۵٪</div>
-            <div id="criteria-tact"></div>
-            <div class="section-title">💪 جسمانی — وزن ۱۰٪</div>
-            <div id="criteria-phys"></div>
-            <div class="section-title">📊 آماری — وزن ۱۰٪</div>
-            <div id="criteria-stat"></div>
-            <br>
-            <button class="btn btn-primary" onclick="calculate()">محاسبه و نمایش داشبورد</button>
+            <!-- EXCEL UPLOAD -->
+            <div id="tab-excel" style="display:none">
+                <div class="card">
+                    <h2>بارگذاری فایل اکسل</h2>
+                    <p style="color:#8b949e;font-size:0.85rem;margin-bottom:14px;">فایل اکسل را انتخاب کنید</p>
+                    <label class="file-btn" for="excel-file">📂 انتخاب فایل</label>
+                    <input type="file" id="excel-file" accept=".xlsx,.xls" onchange="loadExcel(this)">
+                    <div id="excel-msg"></div>
+                    <div id="player-select-wrap" style="display:none;margin-top:16px;">
+                        <label>انتخاب بازیکن</label>
+                        <select id="player-select" onchange="showPlayerFromExcel()"></select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- DASHBOARD -->
+            <div id="tab-dashboard" style="display:none">
+                <div class="card">
+                    <div class="player-info" id="dash-info"></div>
+                    <div class="score-grid" id="score-grid"></div>
+                    <div class="tabs" style="margin-bottom:12px;">
+                        <div class="tab active" onclick="switchChart('radar')">نمودار رادار</div>
+                        <div class="tab" onclick="switchChart('bar')">نمودار میله‌ای</div>
+                    </div>
+                    <div class="chart-wrap">
+                        <canvas id="myChart"></canvas>
+                    </div>
+                    <div style="margin-top:16px;text-align:center;" id="video-link"></div>
+                </div>
+            </div>
         </div>
     </div>
 
-    <!-- EXCEL UPLOAD -->
-    <div id="tab-excel" style="display:none">
-        <div class="card" id="excel-section">
-            <h2>بارگذاری فایل اکسل</h2>
-            <p style="color:#8b949e;font-size:0.85rem;margin-bottom:14px">فایل <code>اکسل نهایی.xlsx</code> را انتخاب کنید</p>
-            <label class="file-btn" for="excel-file">📂 انتخاب فایل xlsx</label>
-            <input type="file" id="excel-file" accept=".xlsx,.xls" onchange="loadExcel(this)">
-            <div id="excel-msg"></div>
-            <div id="player-select-wrap" style="display:none;margin-top:16px">
-                <label>انتخاب بازیکن</label>
-                <select id="player-select" onchange="showPlayerFromExcel()"></select>
-            </div>
-        </div>
-    </div>
+    <script>
+        // ===== DATA =====
+        var CRITERIA = {
+            intel: ['اسکن محیطی (1.1)', 'تصمیم‌گیری سریع (1.2)', 'پیش‌بینی بازی (1.3)', 'هوش موقعیتی (1.4)', 'خلاقیت در بازی (1.5)',
+                'تمرکز و توجه (1.6)'
+            ],
+            tech: ['کنترل توپ (2.1)', 'پاس‌دهی (2.2)', 'دریبل (2.3)', 'شوت (2.4)', 'هدر زدن (2.5)', 'تکل (2.6)'],
+            tact: ['موقعیت‌گیری (3.1)', 'بازی بدون توپ (3.2)', 'پرس و دفاع (3.3)', 'ترانزیشن (3.4)', 'بازی گروهی (3.5)'],
+            phys: ['سرعت (4.1)', 'استقامت (4.2)', 'قدرت (4.3)', 'چابکی (4.4)', 'تعادل (4.5)', 'هماهنگی (4.6)'],
+            stat: ['گل و آسیست (5.1)', 'دقت پاس (5.2)', 'دوئل‌های برنده (5.3)', 'کاورینگ (5.4)', 'خطاها (5.5)']
+        };
 
-    <!-- DASHBOARD -->
-    <div id="tab-dashboard" style="display:none">
-        <div class="card">
-            <div class="player-info" id="dash-info"></div>
-            <div class="score-grid" id="score-grid"></div>
-            <div class="tabs" style="margin-bottom:12px">
-                <div class="tab active" onclick="switchChart('radar')">نمودار رادار</div>
-                <div class="tab" onclick="switchChart('bar')">نمودار میله‌ای</div>
-            </div>
-            <div class="chart-wrap"><canvas id="myChart"></canvas></div>
-            <div style="margin-top:16px;text-align:center" id="video-link"></div>
-        </div>
-    </div>
+        var WEIGHTS = { intel: 30, tech: 25, tact: 25, phys: 10, stat: 10 };
+        var CODES = { SP001: 'مدیر آنالیز', SP002: 'سرمربی', SP003: 'مدیر فنی', SP004: 'آنالیست عملکرد' };
 
-</div>
-</div>
+        var chartInstance = null;
+        var currentData = null;
+        var excelRows = [];
 
-<script>
-// ─── DATA ───────────────────────────────────────────────────────────────────
-const CRITERIA = {
-    intel: ['اسکن محیطی (1.1)','تصمیم‌گیری سریع (1.2)','پیش‌بینی بازی (1.3)','هوش موقعیتی (1.4)','خلاقیت در بازی (1.5)','تمرکز و توجه (1.6)'],
-    tech: ['کنترل توپ (2.1)','پاس‌دهی (2.2)','دریبل (2.3)','شوت (2.4)','هدر زدن (2.5)','تکل (2.6)'],
-    tact: ['موقعیت‌گیری (3.1)','بازی بدون توپ (3.2)','پرس و دفاع (3.3)','ترانزیشن (3.4)','بازی گروهی (3.5)'],
-    phys: ['سرعت (4.1)','استقامت (4.2)','قدرت (4.3)','چابکی (4.4)','تعادل (4.5)','هماهنگی (4.6)'],
-    stat: ['گل و آسیست (5.1)','دقت پاس (5.2)','دوئل‌های برنده (5.3)','کاورینگ (5.4)','خطاها (5.5)']
-};
+        // ===== LOGIN =====
+        function doLogin() {
+            var name = document.getElementById('evaluator-name').value.trim();
+            var code = document.getElementById('access-code').value.trim().toUpperCase();
+            var errDiv = document.getElementById('login-err');
 
-const WEIGHTS = { intel: 30, tech: 25, tact: 25, phys: 10, stat: 10 };
-const CODES = { SP001: 'مدیر آنالیز', SP002: 'سرمربی', SP003: 'مدیر فنی', SP004: 'آنالیست عملکرد' };
+            if (name === '') {
+                errDiv.innerHTML = '<div class="alert alert-err">❌ نام ارزیاب را وارد کنید</div>';
+                return;
+            }
 
-let chartInstance = null;
-let currentData = null;
-let excelRows = [];
+            if (CODES[code] === undefined) {
+                errDiv.innerHTML = '<div class="alert alert-err">❌ کد دسترسی نامعتبر است</div>';
+                return;
+            }
 
-// ─── LOGIN ───────────────────────────────────────────────────────────────────
-function doLogin() {
-    var name = document.getElementById('evaluator-name').value.trim();
-    var code = document.getElementById('access-code').value.trim().toUpperCase();
-    var errDiv = document.getElementById('login-err');
-    
-    if (!name) {
-        errDiv.innerHTML = '<div class="alert alert-err">❌ نام ارزیاب را وارد کنید</div>';
-        return;
-    }
-    if (!CODES[code]) {
-        errDiv.innerHTML = '<div class="alert alert-err">❌ کد دسترسی نامعتبر است</div>';
-        return;
-    }
-    
-    // Successful login
-    errDiv.innerHTML = '';
-    document.getElementById('login-screen').style.display = 'none';
-    document.getElementById('app').style.display = 'block';
-    document.getElementById('f-date').valueAsDate = new Date();
-}
-
-// ─── BUILD FORM ──────────────────────────────────────────────────────────────
-function buildCriteria(containerId, key) {
-    var el = document.getElementById(containerId);
-    CRITERIA[key].forEach(function(label, i) {
-        var name = key + '_' + i;
-        var stars = '';
-        for (var v = 5; v >= 1; v--) {
-            stars += '<input type="radio" name="' + name + '" id="' + name + '_' + v + '" value="' + v + '">' +
-                      '<label for="' + name + '_' + v + '">' + v + '</label>';
+            errDiv.innerHTML = '';
+            document.getElementById('login-screen').style.display = 'none';
+            document.getElementById('app').style.display = 'block';
+            document.getElementById('f-date').valueAsDate = new Date();
         }
-        el.innerHTML += '<div class="criteria-row">' +
-            '<span class="criteria-label">' + label + '</span>' +
-            '<div class="stars">' + stars + '</div>' +
-        '</div>';
-    });
-}
 
-// ─── CALCULATE ───────────────────────────────────────────────────────────────
-function getGroupAvg(key) {
-    var vals = [];
-    CRITERIA[key].forEach(function(_, i) {
-        var el = document.querySelector('input[name="' + key + '_' + i + '"]:checked');
-        if (el) vals.push(+el.value);
-    });
-    if (!vals.length) return null;
-    var sum = 0;
-    for (var i = 0; i < vals.length; i++) sum += vals[i];
-    return sum / vals.length;
-}
-
-function calculate() {
-    var name = document.getElementById('f-name').value.trim();
-    if (!name) { alert('نام بازیکن را وارد کنید'); return; }
-
-    var avgs = {};
-    var keys = Object.keys(CRITERIA);
-    for (var k = 0; k < keys.length; k++) {
-        var key = keys[k];
-        avgs[key] = getGroupAvg(key);
-        if (avgs[key] === null) { alert('لطفاً همه معیارهای ' + key + ' را امتیاز دهید'); return; }
-    }
-
-    var total = 0;
-    var weightKeys = Object.keys(WEIGHTS);
-    for (var w = 0; w < weightKeys.length; w++) {
-        var wk = weightKeys[w];
-        total += (avgs[wk] / 5) * WEIGHTS[wk];
-    }
-
-    currentData = {
-        id: document.getElementById('f-id').value || '—',
-        name: name,
-        age: document.getElementById('f-age').value,
-        pos: document.getElementById('f-pos').value,
-        date: document.getElementById('f-date').value,
-        video: document.getElementById('f-video').value,
-        avgs: avgs,
-        total: total
-    };
-    renderDashboard(currentData);
-    sendToGoogleSheet(currentData);
-}
-
-// ─── RENDER DASHBOARD ────────────────────────────────────────────────────────
-function renderDashboard(d) {
-    document.getElementById('tab-dash').style.display = 'inline-block';
-    showTab('dashboard');
-
-    document.getElementById('dash-info').innerHTML = 
-        '<span>👤 ' + d.name + '</span><span>🆔 ' + d.id + '</span>' +
-        '<span>📅 ' + d.date + '</span><span>🏷️ ' + d.age + '</span><span>📍 ' + d.pos + '</span>';
-
-    var status;
-    if (d.total >= 80) status = ['نخبه', 'elite'];
-    else if (d.total >= 65) status = ['خوب', 'good'];
-    else if (d.total >= 50) status = ['متوسط', 'avg'];
-    else status = ['ضعیف', 'weak'];
-    
-    var labels = { intel: 'هوش', tech: 'تکنیک', tact: 'تاکتیک', phys: 'جسمانی', stat: 'آماری' };
-
-    var grid = '';
-    var labelKeys = Object.keys(labels);
-    for (var l = 0; l < labelKeys.length; l++) {
-        var k = labelKeys[l];
-        var pct = ((d.avgs[k] / 5) * 100).toFixed(1);
-        grid += '<div class="score-box"><div class="val">' + pct + '</div><div class="lbl">' + labels[k] + '</div></div>';
-    }
-    grid += '<div class="score-box score-total"><div class="val">' + d.total.toFixed(1) + '</div><div class="lbl">نمره کل / ۱۰۰</div></div>';
-    grid += '<div class="score-box"><div class="val" style="font-size:1rem;padding-top:8px"><span class="status-badge status-' + status[1] + '">' + status[0] + '</span></div><div class="lbl">وضعیت</div></div>';
-    document.getElementById('score-grid').innerHTML = grid;
-
-    document.getElementById('video-link').innerHTML = d.video
-        ? '<a href="' + d.video + '" target="_blank" style="color:#58a6ff;font-size:0.85rem">🎬 مشاهده ویدیو</a>' : '';
-
-    drawChart('radar', d);
-}
-
-function drawChart(type, d) {
-    var labels = ['هوش', 'تکنیک', 'تاکتیک', 'جسمانی', 'آماری'];
-    var keys = ['intel', 'tech', 'tact', 'phys', 'stat'];
-    var data = [];
-    for (var i = 0; i < keys.length; i++) {
-        data.push(+((d.avgs[keys[i]] / 5) * 100).toFixed(1));
-    }
-
-    if (chartInstance) chartInstance.destroy();
-    var ctx = document.getElementById('myChart').getContext('2d');
-
-    if (type === 'radar') {
-        chartInstance = new Chart(ctx, {
-            type: 'radar',
-            data: {
-                labels: labels,
-                datasets: [{ label: d.name, data: data, backgroundColor: 'rgba(31,111,235,0.2)', borderColor: '#1f6feb', pointBackgroundColor: '#58a6ff', borderWidth: 2 }]
-            },
-            options: {
-                scales: { r: { min: 0, max: 100, ticks: { color: '#8b949e', stepSize: 20 }, grid: { color: '#30363d' }, pointLabels: { color: '#c9d1d9', font: { family: 'Tahoma', size: 12 } } } },
-                plugins: { legend: { labels: { color: '#c9d1d9', font: { family: 'Tahoma' } } } }
+        // ===== BUILD FORM =====
+        function buildCriteria(containerId, key) {
+            var el = document.getElementById(containerId);
+            var items = CRITERIA[key];
+            for (var i = 0; i < items.length; i++) {
+                var name = key + '_' + i;
+                var stars = '';
+                for (var v = 5; v >= 1; v--) {
+                    stars += '<input type="radio" name="' + name + '" id="' + name + '_' + v + '" value="' + v + '">';
+                    stars += '<label for="' + name + '_' + v + '">' + v + '</label>';
+                }
+                el.innerHTML += '<div class="criteria-row">';
+                el.innerHTML += '<span class="criteria-label">' + items[i] + '</span>';
+                el.innerHTML += '<div class="stars">' + stars + '</div>';
+                el.innerHTML += '</div>';
             }
-        });
-    } else {
-        chartInstance = new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: labels,
-                datasets: [{ label: 'امتیاز از ۱۰۰', data: data, backgroundColor: ['#1f6feb','#238636','#f0883e','#8957e5','#3fb950'], borderRadius: 6 }]
-            },
-            options: {
-                scales: {
-                    y: { min: 0, max: 100, ticks: { color: '#8b949e' }, grid: { color: '#30363d' } },
-                    x: { ticks: { color: '#c9d1d9', font: { family: 'Tahoma' } }, grid: { display: false } }
-                },
-                plugins: { legend: { labels: { color: '#c9d1d9', font: { family: 'Tahoma' } } } }
-            }
-        });
-    }
-}
-
-function switchChart(type) {
-    var tabs = document.querySelectorAll('.tabs .tab');
-    for (var i = 0; i < tabs.length; i++) {
-        tabs[i].classList.toggle('active', i === (type === 'radar' ? 0 : 1));
-    }
-    if (currentData) drawChart(type, currentData);
-}
-
-// ─── EXCEL LOADER ────────────────────────────────────────────────────────────
-function loadExcel(input) {
-    var file = input.files[0];
-    if (!file) return;
-    var reader = new FileReader();
-    reader.onload = function(e) {
-        try {
-            var wb = XLSX.read(e.target.result, { type: 'array' });
-            var ws = wb.Sheets['Scores'];
-            if (!ws) { showExcelMsg('شیت Scores یافت نشد', true); return; }
-            var rows = XLSX.utils.sheet_to_json(ws);
-            if (!rows.length) { showExcelMsg('داده‌ای یافت نشد', true); return; }
-            excelRows = rows;
-            var sel = document.getElementById('player-select');
-            var options = '';
-            for (var i = 0; i < rows.length; i++) {
-                options += '<option value="' + i + '">' + (rows[i]['نام و نام خانوادگی'] || 'بازیکن ' + (i+1)) + '</option>';
-            }
-            sel.innerHTML = options;
-            document.getElementById('player-select-wrap').style.display = 'block';
-            showExcelMsg('✅ ' + rows.length + ' بازیکن بارگذاری شد', false);
-            showPlayerFromExcel();
-        } catch(err) { showExcelMsg('خطا در خواندن فایل: ' + err.message, true); }
-    };
-    reader.readAsArrayBuffer(file);
-}
-
-function showExcelMsg(msg, isErr) {
-    document.getElementById('excel-msg').innerHTML = '<div class="alert ' + (isErr ? 'alert-err' : 'alert-ok') + '">' + msg + '</div>';
-}
-
-function showPlayerFromExcel() {
-    var idx = +document.getElementById('player-select').value;
-    var r = excelRows[idx];
-    if (!r) return;
-
-    var colMap = {
-        intel: ['هوش 1.1','هوش 1.2','هوش 1.3','هوش 1.4','هوش 1.5','هوش 1.6'],
-        tech:  ['تکنیک 2.1','تکنیک 2.2','تکنیک 2.3','تکنیک 2.4','تکنیک 2.5','تکنیک 2.6'],
-        tact:  ['تاکتیک 3.1','تاکتیک 3.2','تاکتیک 3.3','تاکتیک 3.4','تاکتیک 3.5'],
-        phys:  ['جسمانی 4.1','جسمانی 4.2','جسمانی 4.3','جسمانی 4.4','جسمانی 4.5','جسمانی 4.6'],
-        stat:  ['آماری 5.1','آماری 5.2','آماری 5.3','آماری 5.4','آماری 5.5']
-    };
-
-    var avgs = {};
-    var mapKeys = Object.keys(colMap);
-    for (var mk = 0; mk < mapKeys.length; mk++) {
-        var key = mapKeys[mk];
-        var cols = colMap[key];
-        var vals = [];
-        for (var c = 0; c < cols.length; c++) {
-            var val = +r[cols[c]];
-            if (val >= 1 && val <= 5) vals.push(val);
         }
-        avgs[key] = vals.length ? vals.reduce(function(a, b) { return a + b; }, 0) / vals.length : 0;
-    }
 
-    var total = 0;
-    var wKeys = Object.keys(WEIGHTS);
-    for (var wk = 0; wk < wKeys.length; wk++) {
-        var wk2 = wKeys[wk];
-        total += (avgs[wk2] / 5) * WEIGHTS[wk2];
-    }
+        // ===== CALCULATE =====
+        function getGroupAvg(key) {
+            var vals = [];
+            var items = CRITERIA[key];
+            for (var i = 0; i < items.length; i++) {
+                var el = document.querySelector('input[name="' + key + '_' + i + '"]:checked');
+                if (el) {
+                    vals.push(parseInt(el.value));
+                }
+            }
+            if (vals.length === 0) return null;
+            var sum = 0;
+            for (var j = 0; j < vals.length; j++) {
+                sum += vals[j];
+            }
+            return sum / vals.length;
+        }
 
-    currentData = {
-        id: r['شناسه بازیکن'] || '—',
-        name: r['نام و نام خانوادگی'] || '—',
-        age: r['رده سنی'] || '—',
-        pos: r['پست بازی'] || '—',
-        date: r['تاریخ ارزیابی'] || '—',
-        video: r['لینک پوشه ویدیو'] || '',
-        avgs: avgs,
-        total: total
-    };
-    renderDashboard(currentData);
-}
+        function calculate() {
+            var name = document.getElementById('f-name').value.trim();
+            if (name === '') {
+                alert('نام بازیکن را وارد کنید');
+                return;
+            }
 
-// ─── TABS ────────────────────────────────────────────────────────────────────
-function showTab(name) {
-    var tabs = ['manual','excel','dashboard'];
-    for (var i = 0; i < tabs.length; i++) {
-        var t = tabs[i];
-        document.getElementById('tab-' + t).style.display = t === name ? 'block' : 'none';
-    }
-    var tabEls = document.querySelectorAll('.tabs .tab');
-    for (var j = 0; j < tabEls.length; j++) {
-        tabEls[j].classList.toggle('active', ['manual','excel','dashboard'][j] === name);
-    }
-}
+            var avgs = {};
+            var keys = Object.keys(CRITERIA);
+            for (var k = 0; k < keys.length; k++) {
+                var key = keys[k];
+                avgs[key] = getGroupAvg(key);
+                if (avgs[key] === null) {
+                    alert('لطفاً همه معیارهای ' + key + ' را امتیاز دهید');
+                    return;
+                }
+            }
 
-// ─── INIT ────────────────────────────────────────────────────────────────────
-buildCriteria('criteria-intel', 'intel');
-buildCriteria('criteria-tech', 'tech');
-buildCriteria('criteria-tact', 'tact');
-buildCriteria('criteria-phys', 'phys');
-buildCriteria('criteria-stat', 'stat');
+            var total = 0;
+            var wKeys = Object.keys(WEIGHTS);
+            for (var w = 0; w < wKeys.length; w++) {
+                var wk = wKeys[w];
+                total += (avgs[wk] / 5) * WEIGHTS[wk];
+            }
 
-// ─── SEND TO GOOGLE SHEET ──────────────────────────────────────────────────
-function sendToGoogleSheet(data) {
-    var url = "https://script.google.com/macros/s/AKfycbxPiQ-BXrvastNX6Bjpq86KjwaFg-aPNYAq5UdFB6r0qa18BMIrj8YWNkaQz6B8pO5-/exec";
-    fetch(url, {
-        method: "POST",
-        headers: { "Content-Type": "text/plain;charset=utf-8" },
-        body: JSON.stringify({
-            evaluator: document.getElementById('evaluator-name').value,
-            id: data.id,
-            name: data.name,
-            age: data.age,
-            pos: data.pos,
-            intel: data.avgs.intel.toFixed(2),
-            tech: data.avgs.tech.toFixed(2),
-            tact: data.avgs.tact.toFixed(2),
-            phys: data.avgs.phys.toFixed(2),
-            stat: data.avgs.stat.toFixed(2),
-            total: data.total.toFixed(1),
-            video: data.video
-        })
-    })
-    .then(function() { alert("✅ ارزیابی ذخیره شد"); })
-    .catch(function(error) { alert("خطا در ارسال اطلاعات"); console.log(error); });
-}
-</script>
+            currentData = {
+                id: document.getElementById('f-id').value || '—',
+                name: name,
+                age: document.getElementById('f-age').value,
+                pos: document.getElementById('f-pos').value,
+                date: document.getElementById('f-date').value,
+                video: document.getElementById('f-video').value,
+                avgs: avgs,
+                total: total
+            };
+            renderDashboard(currentData);
+        }
+
+        // ===== RENDER DASHBOARD =====
+        function renderDashboard(d) {
+            document.getElementById('tab-dash').style.display = 'inline-block';
+            showTab('dashboard');
+
+            var infoHtml = '<span>👤 ' + d.name + '</span>';
+            infoHtml += '<span>🆔 ' + d.id + '</span>';
+            infoHtml += '<span>📅 ' + d.date + '</span>';
+            infoHtml += '<span>🏷️ ' + d.age + '</span>';
+            infoHtml += '<span>📍 ' + d.pos + '</span>';
+            document.getElementById('dash-info').innerHTML = infoHtml;
+
+            var statusText, statusClass;
+            if (d.total >= 80) { statusText = 'نخبه';
+                statusClass = 'elite'; } else if (d.total >= 65) { statusText = 'خوب';
+                statusClass = 'good'; } else if (d.total >= 50) { statusText = 'متوسط';
+                statusClass = 'avg'; } else { statusText = 'ضعیف';
+                statusClass = 'weak'; }
+
+            var labels = { intel: 'هوش', tech: 'تکنیک', tact: 'تاکتیک', phys: 'جسمانی', stat: 'آماری' };
+            var gridHtml = '';
+            var labelKeys = Object.keys(labels);
+            for (var l = 0; l < labelKeys.length; l++) {
+                var k = labelKeys[l];
+                var pct = ((d.avgs[k] / 5) * 100).toFixed(1);
+                gridHtml += '<div class="score-box"><div class="val">' + pct + '</div><div class="lbl">' + labels[k] +
+                '</div></div>';
+            }
+            gridHtml += '<div class="score-box score-total"><div class="val">' + d.total.toFixed(1) +
+                '</div><div class="lbl">نمره کل / ۱۰۰</div></div>';
+            gridHtml += '<div class="score-box"><div class="val" style="font-size:1rem;padding-top:8px"><span class="status-badge status-' +
+                statusClass + '">' + statusText + '</span></div><div class="lbl">وضعیت</div></div>';
+            document.getElementById('score-grid').innerHTML = gridHtml;
+
+            if (d.video) {
+                document.getElementById('video-link').innerHTML = '<a href="' + d.video +
+                    '" target="_blank" style="color:#58a6ff;font-size:0.85rem;">🎬 مشاهده ویدیو</a>';
+            } else {
+                document.getElementById('video-link').innerHTML = '';
+            }
+
+            drawChart('radar', d);
+        }
+
+        // ===== CHART =====
+        function drawChart(type, d) {
+            var labels = ['هوش', 'تکنیک', 'تاکتیک', 'جسمانی', 'آماری'];
+            var keys = ['intel', 'tech', 'tact', 'phys', 'stat'];
+            var data = [];
+            for (var i = 0; i < keys.length; i++) {
+                data.push(parseFloat(((d.avgs[keys[i]] / 5) * 100).toFixed(1)));
+            }
+
+            if (chartInstance) {
+                chartInstance.destroy();
+            }
+            var ctx = document.getElementById('myChart').getContext('2d');
+
+            if (type === 'radar') {
+                chartInstance = new Chart(ctx, {
+                    type: 'radar',
+                    data: {
+                        labels: labels,
+                        datasets: [{ label: d.name, data: data, backgroundColor: 'rgba(31,111,235,0.2)',
+                            borderColor: '#1f6feb', pointBackgroundColor: '#58a6ff', borderWidth: 2 }]
+                    },
+                    options: {
+                        scales: {
+                            r: {
+                                min: 0,
+                                max: 100,
+                                ticks: { color: '#8b949e', stepSize: 20 },
+                                grid: { color: '#30363d' },
+                                pointLabels: { color: '#c9d1d9', font: { size: 12 } }
+                            }
+                        },
+                        plugins: { legend: { labels: { color: '#c9d1d9' } } }
+                    }
+                });
+            } else {
+                chartInstance = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [{ label: 'امتیاز از ۱۰۰', data: data, backgroundColor: ['#1f6feb', '#238636',
+                                '#f0883e', '#8957e5', '#3fb950'
+                            ], borderRadius: 6 }]
+                    },
+                    options: {
+                        scales: {
+                            y: { min: 0, max: 100, ticks: { color: '#8b949e' }, grid: { color: '#30363d' } },
+                            x: { ticks: { color: '#c9d1d9' }, grid: { display: false } }
+                        },
+                        plugins: { legend: { labels: { color: '#c9d1d9' } } }
+                    }
+                });
+            }
+        }
+
+        function switchChart(type) {
+            var tabs = document.querySelectorAll('.tabs .tab');
+            for (var i = 0; i < tabs.length; i++) {
+                if (i === (type === 'radar' ? 0 : 1)) {
+                    tabs[i].classList.add('active');
+                } else {
+                    tabs[i].classList.remove('active');
+                }
+            }
+            if (currentData) {
+                drawChart(type, currentData);
+            }
+        }
+
+        // ===== EXCEL =====
+        function loadExcel(input) {
+            var file = input.files[0];
+            if (!file) return;
+            var reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    var wb = XLSX.read(e.target.result, { type: 'array' });
+                    var ws = wb.Sheets['Scores'];
+                    if (!ws) {
+                        showExcelMsg('شیت Scores یافت نشد', true);
+                        return;
+                    }
+                    var rows = XLSX.utils.sheet_to_json(ws);
+                    if (rows.length === 0) {
+                        showExcelMsg('داده‌ای یافت نشد', true);
+                        return;
+                    }
+                    excelRows = rows;
+                    var sel = document.getElementById('player-select');
+                    var options = '';
+                    for (var i = 0; i < rows.length; i++) {
+                        var playerName = rows[i]['نام و نام خانوادگی'] || 'بازیکن ' + (i + 1);
+                        options += '<option value="' + i + '">' + playerName + '</option>';
+                    }
+                    sel.innerHTML = options;
+                    document.getElementById('player-select-wrap').style.display = 'block';
+                    showExcelMsg('✅ ' + rows.length + ' بازیکن بارگذاری شد', false);
+                    showPlayerFromExcel();
+                } catch (err) {
+                    showExcelMsg('خطا در خواندن فایل: ' + err.message, true);
+                }
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        function showExcelMsg(msg, isErr) {
+            var className = isErr ? 'alert-err' : 'alert-ok';
+            document.getElementById('excel-msg').innerHTML = '<div class="alert ' + className + '">' + msg + '</div>';
+        }
+
+        function showPlayerFromExcel() {
+            var idx = parseInt(document.getElementById('player-select').value);
+            var r = excelRows[idx];
+            if (!r) return;
+
+            var colMap = {
+                intel: ['هوش 1.1', 'هوش 1.2', 'هوش 1.3', 'هوش 1.4', 'هوش 1.5', 'هوش 1.6'],
+                tech: ['تکنیک 2.1', 'تکنیک 2.2', 'تکنیک 2.3', 'تکنیک 2.4', 'تکنیک 2.5', 'تکنیک 2.6'],
+                tact: ['تاکتیک 3.1', 'تاکتیک 3.2', 'تاکتیک 3.3', 'تاکتیک 3.4', 'تاکتیک 3.5'],
+                phys: ['جسمانی 4.1', 'جسمانی 4.2', 'جسمانی 4.3', 'جسمانی 4.4', 'جسمانی 4.5', 'جسمانی 4.6'],
+                stat: ['آماری 5.1', 'آماری 5.2', 'آماری 5.3', 'آماری 5.4', 'آماری 5.5']
+            };
+
+            var avgs = {};
+            var mapKeys = Object.keys(colMap);
+            for (var mk = 0; mk < mapKeys.length; mk++) {
+                var key = mapKeys[mk];
+                var cols = colMap[key];
+                var vals = [];
+                for (var c = 0; c < cols.length; c++) {
+                    var val = parseFloat(r[cols[c]]);
+                    if (val >= 1 && val <= 5) {
+                        vals.push(val);
+                    }
+                }
+                if (vals.length > 0) {
+                    var sum = 0;
+                    for (var v = 0; v < vals.length; v++) {
+                        sum += vals[v];
+                    }
+                    avgs[key] = sum / vals.length;
+                } else {
+                    avgs[key] = 0;
+                }
+            }
+
+            var total = 0;
+            var wKeys = Object.keys(WEIGHTS);
+            for (var wk = 0; wk < wKeys.length; wk++) {
+                var wk2 = wKeys[wk];
+                total += (avgs[wk2] / 5) * WEIGHTS[wk2];
+            }
+
+            currentData = {
+                id: r['شناسه بازیکن'] || '—',
+                name: r['نام و نام خانوادگی'] || '—',
+                age: r['رده سنی'] || '—',
+                pos: r['پست بازی'] || '—',
+                date: r['تاریخ ارزیابی'] || '—',
+                video: r['لینک پوشه ویدیو'] || '',
+                avgs: avgs,
+                total: total
+            };
+            renderDashboard(currentData);
+        }
+
+        // ===== TABS =====
+        function showTab(name) {
+            var tabs = ['manual', 'excel', 'dashboard'];
+            for (var i = 0; i < tabs.length; i++) {
+                var t = tabs[i];
+                if (t === name) {
+                    document.getElementById('tab-' + t).style.display = 'block';
+                } else {
+                    document.getElementById('tab-' + t).style.display = 'none';
+                }
+            }
+            var tabEls = document.querySelectorAll('.tabs .tab');
+            var tabNames = ['manual', 'excel', 'dashboard'];
+            for (var j = 0; j < tabEls.length; j++) {
+                if (tabNames[j] === name) {
+                    tabEls[j].classList.add('active');
+                } else {
+                    tabEls[j].classList.remove('active');
+                }
+            }
+        }
+
+        // ===== INIT =====
+        buildCriteria('criteria-intel', 'intel');
+        buildCriteria('criteria-tech', 'tech');
+        buildCriteria('criteria-tact', 'tact');
+        buildCriteria('criteria-phys', 'phys');
+        buildCriteria('criteria-stat', 'stat');
+    </script>
+
 </body>
 </html>
