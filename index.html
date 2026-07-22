@@ -303,7 +303,7 @@ function calculate() {
 
   const total = Object.keys(WEIGHTS).reduce((sum, k) => sum + (avgs[k] / 5) * WEIGHTS[k], 0);
 
-  currentData = {
+currentData = {
     id: document.getElementById('f-id').value || '—',
     name,
     age: document.getElementById('f-age').value,
@@ -311,8 +311,11 @@ function calculate() {
     date: document.getElementById('f-date').value,
     video: document.getElementById('f-video').value,
     avgs, total
-  };
-  renderDashboard(currentData);
+};
+
+saveToGoogleSheet(currentData);
+
+renderDashboard(currentData);
 }
 
 // ─── RENDER DASHBOARD ────────────────────────────────────────────────────────
