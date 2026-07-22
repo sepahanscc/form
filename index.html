@@ -304,7 +304,7 @@ function calculate() {
   const total = Object.keys(WEIGHTS).reduce((sum, k) => sum + (avgs[k] / 5) * WEIGHTS[k], 0);
 
   currentData = {
-    id: document.getElementById('f-id').value || '—',
+    id: document.getElementById('f-id').value  '—',
     name,
     age: document.getElementById('f-age').value,
     pos: document.getElementById('f-pos').value,
