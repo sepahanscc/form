@@ -447,7 +447,41 @@ function showPlayerFromExcel() {
   };
   renderDashboard(currentData);
 }
+function saveToGoogleSheet(d){
 
+const data = {
+نام_بازیکن: d.name,
+شناسه: d.id,
+رده: d.age,
+پست: d.pos,
+تاریخ: d.date,
+
+هوش: d.avgs.intel.toFixed(2),
+تکنیک: d.avgs.tech.toFixed(2),
+تاکتیک: d.avgs.tact.toFixed(2),
+جسمانی: d.avgs.phys.toFixed(2),
+آماری: d.avgs.stat.toFixed(2),
+
+نمره_کل: d.total.toFixed(1)
+};
+
+
+fetch(GOOGLE_SCRIPT_URL,{
+method:"POST",
+mode:"no-cors",
+headers:{
+"Content-Type":"application/json"
+},
+body:JSON.stringify(data)
+})
+.then(()=>{
+console.log("ذخیره شد");
+})
+.catch(err=>{
+console.log(err);
+});
+
+}
 // ─── TABS ────────────────────────────────────────────────────────────────────
 function showTab(name) {
   ['manual','excel','dashboard'].forEach(t => {
