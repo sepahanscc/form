@@ -271,7 +271,9 @@ function buildCriteria(containerId, key) {
       stars += <input type="radio" name="${name}" id="${name}_${v}" value="${v}">
                 <label for="${name}_${v}">${v}</label>;
     }
-    el.innerHTML += <div class="criteria-row">
+    el.innerHTML += `
+<div class="criteria-row">
+</div>`;
       <span class="criteria-label">${label}</span>
       <div class="stars">${stars}</div>
     </div>;
@@ -282,7 +284,7 @@ function buildCriteria(containerId, key) {
 function getGroupAvg(key) {
   const vals = [];
   CRITERIA[key].forEach((_, i) => {
-    const el = document.querySelector(input[name="${key}_${i}"]:checked);
+    const el = document.querySelector(`input[name="${key}_${i}"]:checked`);
     if (el) vals.push(+el.value);
   });
   if (!vals.length) return null;
@@ -296,7 +298,7 @@ function calculate() {
   const avgs = {};
   for (const key of Object.keys(CRITERIA)) {
     avgs[key] = getGroupAvg(key);
-    if (avgs[key] === null) { alert(لطفاً همه معیارهای ${key} را امتیاز دهید); return; }
+    if (avgs[key] === null) { alert(`لطفاً همه معیارهای ${key} را امتیاز دهید`); return; }
   }
 
   const total = Object.keys(WEIGHTS).reduce((sum, k) => sum + (avgs[k] / 5) * WEIGHTS[k], 0);
