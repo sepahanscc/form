@@ -313,6 +313,7 @@ function calculate() {
     avgs, total
   };
   renderDashboard(currentData);
+  sendToGoogleSheet(currentData);  
 }
 
 // ─── RENDER DASHBOARD ────────────────────────────────────────────────────────
@@ -461,6 +462,105 @@ buildCriteria('criteria-tech', 'tech');
 buildCriteria('criteria-tact', 'tact');
 buildCriteria('criteria-phys', 'phys');
 buildCriteria('criteria-stat', 'stat');
+function sendToGoogleSheet(data){
+
+
+
+const url =
+
+"https://script.google.com/macros/s/AKfycbwJ7gVqs0gC5_PPJ1dAhn9SUQZVFZPrEB6EoBlzHbuvygD-TWN5shmrTTnuH-BXfIHU/exec";
+
+
+
+
+
+fetch(url,{
+
+method:"POST",
+
+
+
+mode:"no-cors",
+
+
+
+headers:{
+
+"Content-Type":"application/json"
+
+},
+
+
+
+body:JSON.stringify({
+
+
+
+evaluator:
+
+document.getElementById('evaluator-name').value,
+
+
+
+id:data.id,
+
+
+
+name:data.name,
+
+
+
+age:data.age,
+
+
+
+pos:data.pos,
+
+
+
+intel:data.avgs.intel.toFixed(2),
+
+
+
+tech:data.avgs.tech.toFixed(2),
+
+
+
+tact:data.avgs.tact.toFixed(2),
+
+
+
+phys:data.avgs.phys.toFixed(2),
+
+
+
+stat:data.avgs.stat.toFixed(2),
+
+
+
+total:data.total.toFixed(1),
+
+
+
+video:data.video
+
+
+
+})
+
+
+
+});
+
+
+
+
+
+alert("✅ ارزیابی در گوگل شیت ذخیره شد");
+
+
+
+}    
 </script>
 </body>
 </html>
