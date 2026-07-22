@@ -1,4 +1,90 @@
-.tab { padding: 6px 16px; border-radius: 6px; cursor: pointer; font-size: 0.85rem; background: #21262d; color: #8b949e; border: 1px solid #30363d; }
+s<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<head>
+<meta charset="UTF-8">
+
+<style>
+
+.header {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    margin: 30px auto;
+}
+
+.sepahan-logo {
+    width: 90px;
+    height: auto;
+    margin-bottom: 15px;
+}
+
+.header h1 {
+    margin: 0;
+    text-align: center;
+}
+
+</style>
+
+</head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>سپاهان</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+<style>
+@font-face {
+    font-family: 'IRANSans';
+    src: url('IRANSansWeb(FaNum)_Bold.ttf') format('truetype');
+    font-weight: bold;
+}
+
+body, * {
+    font-family: 'IRANSans', Tahoma, sans-serif !important;
+}
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: Tahoma, sans-serif; background: #0d1117; color: #e6edf3; min-height: 100vh; }
+  .container { max-width: 960px; margin: 0 auto; padding: 20px; }
+  h1 { text-align: center; color: #58a6ff; margin-bottom: 24px; font-size: 1.4rem; }
+  .card { background: #161b22; border: 1px solid #30363d; border-radius: 10px; padding: 20px; margin-bottom: 20px; }
+  .card h2 { color: #58a6ff; margin-bottom: 16px; font-size: 1rem; }
+  label { display: block; margin-bottom: 6px; font-size: 0.85rem; color: #8b949e; }
+  input, select { width: 100%; padding: 8px 12px; background: #0d1117; border: 1px solid #30363d; border-radius: 6px; color: #e6edf3; font-family: Tahoma, sans-serif; font-size: 0.9rem; }
+  input:focus, select:focus { outline: none; border-color: #58a6ff; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+  .btn { padding: 10px 24px; border: none; border-radius: 6px; cursor: pointer; font-family: Tahoma, sans-serif; font-size: 0.9rem; font-weight: bold; }
+  .btn-primary { background: #238636; color: #fff; }
+  .btn-secondary { background: #1f6feb; color: #fff; }
+  .btn:hover { opacity: 0.85; }
+  .section-title { color: #f0883e; font-size: 0.95rem; font-weight: bold; margin: 16px 0 10px; border-bottom: 1px solid #30363d; padding-bottom: 6px; }
+  .criteria-row { display: flex; align-items: center; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #21262d; }
+  .criteria-label { font-size: 0.85rem; color: #c9d1d9; flex: 1; }
+  .stars { display: flex; gap: 6px; }
+  .stars input[type=radio] { display: none; }
+  .stars label { width: 28px; height: 28px; background: #21262d; border-radius: 4px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 0.8rem; color: #8b949e; margin: 0; }
+  .stars input[type=radio]:checked ~ label, .stars label:hover { background: #1f6feb; color: #fff; }
+  /* RTL star fix */
+  .stars { flex-direction: row-reverse; }
+  .stars input[type=radio]:checked + label,
+  .stars input[type=radio]:checked ~ label { background: #1f6feb; color: #fff; }
+  #dashboard { display: none; }
+  .score-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px; }
+  .score-box { background: #0d1117; border: 1px solid #30363d; border-radius: 8px; padding: 14px; text-align: center; }
+  .score-box .val { font-size: 1.8rem; font-weight: bold; color: #58a6ff; }
+  .score-box .lbl { font-size: 0.75rem; color: #8b949e; margin-top: 4px; }
+  .score-total .val { color: #3fb950; font-size: 2.2rem; }
+  .status-badge { display: inline-block; padding: 4px 14px; border-radius: 20px; font-size: 0.85rem; font-weight: bold; }
+  .status-elite { background: #1a4731; color: #3fb950; }
+  .status-good { background: #1c3a5e; color: #58a6ff; }
+  .status-avg { background: #3d2b00; color: #d29922; }
+  .status-weak { background: #3d1a1a; color: #f85149; }
+  .chart-wrap { position: relative; height: 320px; }
+  .tabs { display: flex; gap: 8px; margin-bottom: 16px; }
+  .tab { padding: 6px 16px; border-radius: 6px; cursor: pointer; font-size: 0.85rem; background: #21262d; color: #8b949e; border: 1px solid #30363d; }
   .tab.active { background: #1f6feb; color: #fff; border-color: #1f6feb; }
   #excel-section { text-align: center; padding: 10px 0; }
   #excel-section input[type=file] { display: none; }
@@ -89,95 +175,7 @@
 
       <div class="section-title">💪 جسمانی — وزن ۱۰٪</div>
       <div id="criteria-phys"></div>
-
-s<!DOCTYPE html>
-<html lang="fa" dir="rtl">
-<head>
-<head>
-<meta charset="UTF-8">
-
-<style>
-
-.header {
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    margin: 30px auto;
-}
-
-.sepahan-logo {
-    width: 90px;
-    height: auto;
-    margin-bottom: 15px;
-}
-
-.header h1 {
-    margin: 0;
-    text-align: center;
-}
-
-</style>
-
-</head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>سپاهان</title>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
-<style>
-@font-face {
-    font-family: 'IRANSans';
-    src: url('IRANSansWeb(FaNum)_Bold.ttf') format('truetype');
-    font-weight: bold;
-}
-
-body, * {
-    font-family: 'IRANSans', Tahoma, sans-serif !important;
-}
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: Tahoma, sans-serif; background: #0d1117; color: #e6edf3; min-height: 100vh; }
-  .container { max-width: 960px; margin: 0 auto; padding: 20px; }
-  h1 { text-align: center; color: #58a6ff; margin-bottom: 24px; font-size: 1.4rem; }
-  .card { background: #161b22; border: 1px solid #30363d; border-radius: 10px; padding: 20px; margin-bottom: 20px; }
-  .card h2 { color: #58a6ff; margin-bottom: 16px; font-size: 1rem; }
-  label { display: block; margin-bottom: 6px; font-size: 0.85rem; color: #8b949e; }
-  input, select { width: 100%; padding: 8px 12px; background: #0d1117; border: 1px solid #30363d; border-radius: 6px; color: #e6edf3; font-family: Tahoma, sans-serif; font-size: 0.9rem; }
-  input:focus, select:focus { outline: none; border-color: #58a6ff; }
-  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
-  .btn { padding: 10px 24px; border: none; border-radius: 6px; cursor: pointer; font-family: Tahoma, sans-serif; font-size: 0.9rem; font-weight: bold; }
-  .btn-primary { background: #238636; color: #fff; }
-  .btn-secondary { background: #1f6feb; color: #fff; }
-  .btn:hover { opacity: 0.85; }
-  .section-title { color: #f0883e; font-size: 0.95rem; font-weight: bold; margin: 16px 0 10px; border-bottom: 1px solid #30363d; padding-bottom: 6px; }
-  .criteria-row { display: flex; align-items: center; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #21262d; }
-  .criteria-label { font-size: 0.85rem; color: #c9d1d9; flex: 1; }
-  .stars { display: flex; gap: 6px; }
-  .stars input[type=radio] { display: none; }
-  .stars label { width: 28px; height: 28px; background: #21262d; border-radius: 4px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 0.8rem; color: #8b949e; margin: 0; }
-  .stars input[type=radio]:checked ~ label, .stars label:hover { background: #1f6feb; color: #fff; }
-  /* RTL star fix */
-  .stars { flex-direction: row-reverse; }
-  .stars input[type=radio]:checked + label,
-  .stars input[type=radio]:checked ~ label { background: #1f6feb; color: #fff; }
-  #dashboard { display: none; }
-  .score-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px; }
-  .score-box { background: #0d1117; border: 1px solid #30363d; border-radius: 8px; padding: 14px; text-align: center; }
-  .score-box .val { font-size: 1.8rem; font-weight: bold; color: #58a6ff; }
-  .score-box .lbl { font-size: 0.75rem; color: #8b949e; margin-top: 4px; }
-  .score-total .val { color: #3fb950; font-size: 2.2rem; }
-  .status-badge { display: inline-block; padding: 4px 14px; border-radius: 20px; font-size: 0.85rem; font-weight: bold; }
-  .status-elite { background: #1a4731; color: #3fb950; }
-  .status-good { background: #1c3a5e; color: #58a6ff; }
-  .status-avg { background: #3d2b00; color: #d29922; }
-  .status-weak { background: #3d1a1a; color: #f85149; }
-  .chart-wrap { position: relative; height: 320px; }
-  .tabs { display: flex; gap: 8px; margin-bottom: 16px; }
-
-<div class="section-title">📊 آماری — وزن ۱۰٪</div>
+	  <div class="section-title">📊 آماری — وزن ۱۰٪</div>
       <div id="criteria-stat"></div>
 
       <br>
@@ -279,104 +277,6 @@ function buildCriteria(containerId, key) {
     </div>`;
   });
 }
-
-// ─── CALCULATE ───────────────────────────────────────────────────────────────
-function getGroupAvg(key) {
-  const vals = [];
-  CRITERIA[key].forEach((_, i) => {
-    const el = document.querySelector(`input[name="${key}_${i}"]:checked`);
-    if (el) vals.push(+el.value);
-  });
-  if (!vals.length) return null;
-  return vals.reduce((a, b) => a + b, 0) / vals.length;
-}
-
-function calculate() {
-  const name = document.getElementById('f-name').value.trim();
-  if (!name) { alert('نام بازیکن را وارد کنید'); return; }
-
-  const avgs = {};
-  for (const key of Object.keys(CRITERIA)) {
-    avgs[key] = getGroupAvg(key);
-    if (avgs[key] === null) { alert(لطفاً همه معیارهای ${key} را امتیاز دهید); return; }
-  }
-
-  const total = Object.keys(WEIGHTS).reduce((sum, k) => sum + (avgs[k] / 5) * WEIGHTS[k], 0);
-
-  currentData = {
-    id: document.getElementById('f-id').value  '—',
-    name,
-    age: document.getElementById('f-age').value,
-    pos: document.getElementById('f-pos').value,
-    date: document.getElementById('f-date').value,
-    video: document.getElementById('f-video').value,
-    avgs, total
-  };
-  renderDashboard(currentData);
-  sendToGoogleSheet(currentData);  
-}
-
-// ─── RENDER DASHBOARD ────────────────────────────────────────────────────────
-function renderDashboard(d) {
-  document.getElementById('tab-dash').style.display = 'inline-block';
-  showTab('dashboard');
-
-  document.getElementById('dash-info').innerHTML = `
-    <span>👤 ${d.name}</span><span>🆔 ${d.id}</span>
-    <span>📅 ${d.date}</span><span>🏷 ${d.age}</span><span>📍 ${d.pos}</span>`;
-
-  const status = d.total >= 80 ? ['نخبه', 'elite'] : d.total >= 65 ? ['خوب', 'good'] : d.total >= 50 ? ['متوسط', 'avg'] : ['ضعیف', 'weak'];
-  const labels = { intel: 'هوش', tech: 'تکنیک', tact: 'تاکتیک', phys: 'جسمانی', stat: 'آماری' };
-
-  let grid = '';
-  for (const [k, lbl] of Object.entries(labels)) {
-    const pct = ((d.avgs[k] / 5) * 100).toFixed(1);
-    grid += `<div class="score-box"><div class="val">${pct}</div><div class="lbl">${lbl}</div></div>`;
-  }
-  grid += `<div class="score-box score-total"><div class="val">${d.total.toFixed(1)}</div><div class="lbl">نمره کل / ۱۰۰</div></div>`;
-  grid += `<div class="score-box"><div class="val" style="font-size:1rem;padding-top:8px"><span class="status-badge status-${status[1]}">${status[0]}</span></div><div class="lbl">وضعیت</div></div>`;
-  document.getElementById('score-grid').innerHTML = grid;
-
-  document.getElementById('video-link').innerHTML = d.video
-    ? `<a href="${d.video}" target="_blank" style="color:#58a6ff;font-size:0.85rem">🎬 مشاهده ویدیو</a>` : '';
-
-  drawChart('radar', d);
-}
-
-function drawChart(type, d) {
-  const labels = ['هوش', 'تکنیک', 'تاکتیک', 'جسمانی', 'آماری'];
-  const keys = ['intel', 'tech', 'tact', 'phys', 'stat'];
-  const data = keys.map(k => +((d.avgs[k] / 5) * 100).toFixed(1));
-
-  if (chartInstance) chartInstance.destroy();
-  const ctx = document.getElementById('myChart').getContext('2d');
-
-  if (type === 'radar') {
-    chartInstance = new Chart(ctx, {
-      type: 'radar',
-      data: {
-        labels,
-        datasets: [{ label: d.name, data, backgroundColor: 'rgba(31,111,235,0.2)', borderColor: '#1f6feb', pointBackgroundColor: '#58a6ff', borderWidth: 2 }]
-      },
-      options: {
-        scales: { r: { min: 0, max: 100, ticks: { color: '#8b949e', stepSize: 20 }, grid: { color: '#30363d' }, pointLabels: { color: '#c9d1d9', font: { family: 'Tahoma', size: 12 } } } },
-        plugins: { legend: { labels: { color: '#c9d1d9', font: { family: 'Tahoma' } } } }
-      }
-    });
-  } else {
-    chartInstance = new Chart(ctx, {
-      type: 'bar',
-      data: {
-        labels,
-        datasets: [{ label: 'امتیاز از ۱۰۰', data, backgroundColor: ['#1f6feb','#238636','#f0883e','#8957e5','#3fb950'], borderRadius: 6 }]
-      },
-      options: {
-        scales: {
-          y: { min: 0, max: 100, ticks: { color: '#8b949e' }, grid: { color: '#30363d' } },
-          x: { ticks: { color: '#c9d1d9', font: { family: 'Tahoma' } }, grid: { display: false } }
-        },
-        plugins: { legend: { labels: { color: '#c9d1d9', font:
-
 { family: 'Tahoma' } } } }
       }
     });
