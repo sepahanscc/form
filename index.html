@@ -265,7 +265,7 @@ function showLoginErr(msg) {
 function buildCriteria(containerId, key) {
   const el = document.getElementById(containerId);
   CRITERIA[key].forEach((label, i) => {
-    const name = ${key}_${i};
+    const name = `${key}_${i}`;
     let stars = '';
     for (let v = 5; v >= 1; v--) {
       stars += <input type="radio" name="${name}" id="${name}_${v}" value="${v}">
