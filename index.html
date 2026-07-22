@@ -1,88 +1,5 @@
-<!DOCTYPE html>
-<html lang="fa" dir="rtl">
-<head>
-<meta charset="UTF-8">
-
-<style>
-
-.header {
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    margin: 30px auto;
-}
-.sepahan-logo {
-    width: 90px;
-    height: auto;
-    margin-bottom: 15px;
-}
-
-.header h1 {
-    margin: 0;
-    text-align: center;
-}
-
-</style>
-
-</head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>⚽ سیستم ارزیابی بازیکنان — آکادمی سپاهان</title>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
-<style>
-@font-face {
-    font-family: 'IRANSans';
-    src: url('IRANSansWeb(FaNum)_Bold.ttf') format('truetype');
-    font-weight: bold;
-}
-
-body, * {
-    font-family: 'IRANSans', Tahoma, sans-serif !important;
-}
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: Tahoma, sans-serif; background: #0d1117; color: #e6edf3; min-height: 100vh; }
-  .container { max-width: 960px; margin: 0 auto; padding: 20px; }
-  h1 { text-align: center; color: #58a6ff; margin-bottom: 24px; font-size: 1.4rem; }
-  .card { background: #161b22; border: 1px solid #30363d; border-radius: 10px; padding: 20px; margin-bottom: 20px; }
-  .card h2 { color: #58a6ff; margin-bottom: 16px; font-size: 1rem; }
-  label { display: block; margin-bottom: 6px; font-size: 0.85rem; color: #8b949e; }
-  input, select { width: 100%; padding: 8px 12px; background: #0d1117; border: 1px solid #30363d; border-radius: 6px; color: #e6edf3; font-family: Tahoma, sans-serif; font-size: 0.9rem; }
-  input:focus, select:focus { outline: none; border-color: #58a6ff; }
-  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
-  .btn { padding: 10px 24px; border: none; border-radius: 6px; cursor: pointer; font-family: Tahoma, sans-serif; font-size: 0.9rem; font-weight: bold; }
-  .btn-primary { background: #238636; color: #fff; }
-  .btn-secondary { background: #1f6feb; color: #fff; }
-  .btn:hover { opacity: 0.85; }
-  .section-title { color: #f0883e; font-size: 0.95rem; font-weight: bold; margin: 16px 0 10px; border-bottom: 1px solid #30363d; padding-bottom: 6px; }
-  .criteria-row { display: flex; align-items: center; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #21262d; }
-  .criteria-label { font-size: 0.85rem; color: #c9d1d9; flex: 1; }
-  .stars { display: flex; gap: 6px; }
-  .stars input[type=radio] { display: none; }
-  .stars label { width: 28px; height: 28px; background: #21262d; border-radius: 4px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 0.8rem; color: #8b949e; margin: 0; }
-  .stars input[type=radio]:checked ~ label, .stars label:hover { background: #1f6feb; color: #fff; }
-  /* RTL star fix */
-  .stars { flex-direction: row-reverse; }
-  .stars input[type=radio]:checked + label,
-  .stars input[type=radio]:checked ~ label { background: #1f6feb; color: #fff; }
-  #dashboard { display: none; }
-  .score-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px; }
-  .score-box { background: #0d1117; border: 1px solid #30363d; border-radius: 8px; padding: 14px; text-align: center; }
-  .score-box .val { font-size: 1.8rem; font-weight: bold; color: #58a6ff; }
-  .score-box .lbl { font-size: 0.75rem; color: #8b949e; margin-top: 4px; }
-  .score-total .val { color: #3fb950; font-size: 2.2rem; }
-  .status-badge { display: inline-block; padding: 4px 14px; border-radius: 20px; font-size: 0.85rem; font-weight: bold; }
-  .status-elite { background: #1a4731; color: #3fb950; }
-  .status-good { background: #1c3a5e; color: #58a6ff; }
-  .status-avg { background: #3d2b00; color: #d29922; }
-  .status-weak { background: #3d1a1a; color: #f85149; }
-  .chart-wrap { position: relative; height: 320px; }
-  .tabs { display: flex; gap: 8px; margin-bottom: 16px; }
-  .tab { padding: 6px 16px; border-radius: 6px; cursor: pointer; font-size: 0.85rem; background: #21262d; color: #8b949e; border: 1px solid #30363d; }
+Farhad Davari, [7/22/2026 1:45 PM]
+.tab { padding: 6px 16px; border-radius: 6px; cursor: pointer; font-size: 0.85rem; background: #21262d; color: #8b949e; border: 1px solid #30363d; }
   .tab.active { background: #1f6feb; color: #fff; border-color: #1f6feb; }
   #excel-section { text-align: center; padding: 10px 0; }
   #excel-section input[type=file] { display: none; }
@@ -103,10 +20,8 @@ body, * {
 <body>
 <div class="header">
     <img src="sepahan-logo.png" alt="Sepahan Logo" class="sepahan-logo">
-    <h1>⚽ سیستم ارزیابی بازیکنان — آکادمی سپاهان
-</h1>
+    <h1></h1>
 </div>
-    
 <!-- LOGIN -->
 <div id="login-screen">
   <div class="card">
@@ -167,7 +82,7 @@ body, * {
       <div class="section-title">🧠 هوش — وزن ۳۰٪</div>
       <div id="criteria-intel"></div>
 
-      <div class="section-title">⚽ تکنیک — وزن ۲۵٪</div>
+      <div class="section-title">⚽️ تکنیک — وزن ۲۵٪</div>
       <div id="criteria-tech"></div>
 
       <div class="section-title">🎯 تاکتیک — وزن ۲۵٪</div>
@@ -176,7 +91,96 @@ body, * {
       <div class="section-title">💪 جسمانی — وزن ۱۰٪</div>
       <div id="criteria-phys"></div>
 
-      <div class="section-title">📊 آماری — وزن ۱۰٪</div>
+Farhad Davari, [7/22/2026 1:45 PM]
+s<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<head>
+<meta charset="UTF-8">
+
+<style>
+
+.header {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    margin: 30px auto;
+}
+
+.sepahan-logo {
+    width: 90px;
+    height: auto;
+    margin-bottom: 15px;
+}
+
+.header h1 {
+    margin: 0;
+    text-align: center;
+}
+
+</style>
+
+</head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>سپاهان</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+<style>
+@font-face {
+    font-family: 'IRANSans';
+    src: url('IRANSansWeb(FaNum)_Bold.ttf') format('truetype');
+    font-weight: bold;
+}
+
+body, * {
+    font-family: 'IRANSans', Tahoma, sans-serif !important;
+}
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: Tahoma, sans-serif; background: #0d1117; color: #e6edf3; min-height: 100vh; }
+  .container { max-width: 960px; margin: 0 auto; padding: 20px; }
+  h1 { text-align: center; color: #58a6ff; margin-bottom: 24px; font-size: 1.4rem; }
+  .card { background: #161b22; border: 1px solid #30363d; border-radius: 10px; padding: 20px; margin-bottom: 20px; }
+  .card h2 { color: #58a6ff; margin-bottom: 16px; font-size: 1rem; }
+  label { display: block; margin-bottom: 6px; font-size: 0.85rem; color: #8b949e; }
+  input, select { width: 100%; padding: 8px 12px; background: #0d1117; border: 1px solid #30363d; border-radius: 6px; color: #e6edf3; font-family: Tahoma, sans-serif; font-size: 0.9rem; }
+  input:focus, select:focus { outline: none; border-color: #58a6ff; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+  .btn { padding: 10px 24px; border: none; border-radius: 6px; cursor: pointer; font-family: Tahoma, sans-serif; font-size: 0.9rem; font-weight: bold; }
+  .btn-primary { background: #238636; color: #fff; }
+  .btn-secondary { background: #1f6feb; color: #fff; }
+  .btn:hover { opacity: 0.85; }
+  .section-title { color: #f0883e; font-size: 0.95rem; font-weight: bold; margin: 16px 0 10px; border-bottom: 1px solid #30363d; padding-bottom: 6px; }
+  .criteria-row { display: flex; align-items: center; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #21262d; }
+  .criteria-label { font-size: 0.85rem; color: #c9d1d9; flex: 1; }
+  .stars { display: flex; gap: 6px; }
+  .stars input[type=radio] { display: none; }
+  .stars label { width: 28px; height: 28px; background: #21262d; border-radius: 4px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 0.8rem; color: #8b949e; margin: 0; }
+  .stars input[type=radio]:checked ~ label, .stars label:hover { background: #1f6feb; color: #fff; }
+  /* RTL star fix */
+  .stars { flex-direction: row-reverse; }
+  .stars input[type=radio]:checked + label,
+  .stars input[type=radio]:checked ~ label { background: #1f6feb; color: #fff; }
+  #dashboard { display: none; }
+  .score-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px; }
+  .score-box { background: #0d1117; border: 1px solid #30363d; border-radius: 8px; padding: 14px; text-align: center; }
+  .score-box .val { font-size: 1.8rem; font-weight: bold; color: #58a6ff; }
+  .score-box .lbl { font-size: 0.75rem; color: #8b949e; margin-top: 4px; }
+  .score-total .val { color: #3fb950; font-size: 2.2rem; }
+  .status-badge { display: inline-block; padding: 4px 14px; border-radius: 20px; font-size: 0.85rem; font-weight: bold; }
+  .status-elite { background: #1a4731; color: #3fb950; }
+  .status-good { background: #1c3a5e; color: #58a6ff; }
+  .status-avg { background: #3d2b00; color: #d29922; }
+  .status-weak { background: #3d1a1a; color: #f85149; }
+  .chart-wrap { position: relative; height: 320px; }
+  .tabs { display: flex; gap: 8px; margin-bottom: 16px; }
+
+Farhad Davari, [7/22/2026 1:45 PM]
+<div class="section-title">📊 آماری — وزن ۱۰٪</div>
       <div id="criteria-stat"></div>
 
       <br>
@@ -259,14 +263,14 @@ function doLogin() {
   document.getElementById('f-date').valueAsDate = new Date();
 }
 function showLoginErr(msg) {
-  document.getElementById('login-err').innerHTML = `<div class="alert alert-err">${msg}</div>`;
+  document.getElementById('login-err').innerHTML = <div class="alert alert-err">${msg}</div>;
 }
 
 // ─── BUILD FORM ──────────────────────────────────────────────────────────────
 function buildCriteria(containerId, key) {
   const el = document.getElementById(containerId);
   CRITERIA[key].forEach((label, i) => {
-    const name = `${key}_${i}`;
+    const name = ${key}_${i};
     let stars = '';
     for (let v = 5; v >= 1; v--) {
       stars += `<input type="radio" name="${name}" id="${name}_${v}" value="${v}">
@@ -279,6 +283,7 @@ function buildCriteria(containerId, key) {
   });
 }
 
+Farhad Davari, [7/22/2026 1:45 PM]
 // ─── CALCULATE ───────────────────────────────────────────────────────────────
 function getGroupAvg(key) {
   const vals = [];
@@ -297,13 +302,13 @@ function calculate() {
   const avgs = {};
   for (const key of Object.keys(CRITERIA)) {
     avgs[key] = getGroupAvg(key);
-    if (avgs[key] === null) { alert(`لطفاً همه معیارهای ${key} را امتیاز دهید`); return; }
+    if (avgs[key] === null) { alert(لطفاً همه معیارهای ${key} را امتیاز دهید); return; }
   }
 
   const total = Object.keys(WEIGHTS).reduce((sum, k) => sum + (avgs[k] / 5) * WEIGHTS[k], 0);
 
   currentData = {
-    id: document.getElementById('f-id').value || '—',
+    id: document.getElementById('f-id').value  '—',
     name,
     age: document.getElementById('f-age').value,
     pos: document.getElementById('f-pos').value,
@@ -322,7 +327,7 @@ function renderDashboard(d) {
 
   document.getElementById('dash-info').innerHTML = `
     <span>👤 ${d.name}</span><span>🆔 ${d.id}</span>
-    <span>📅 ${d.date}</span><span>🏷️ ${d.age}</span><span>📍 ${d.pos}</span>`;
+    <span>📅 ${d.date}</span><span>🏷 ${d.age}</span><span>📍 ${d.pos}</span>`;
 
   const status = d.total >= 80 ? ['نخبه', 'elite'] : d.total >= 65 ? ['خوب', 'good'] : d.total >= 50 ? ['متوسط', 'avg'] : ['ضعیف', 'weak'];
   const labels = { intel: 'هوش', tech: 'تکنیک', tact: 'تاکتیک', phys: 'جسمانی', stat: 'آماری' };
@@ -374,7 +379,10 @@ function drawChart(type, d) {
           y: { min: 0, max: 100, ticks: { color: '#8b949e' }, grid: { color: '#30363d' } },
           x: { ticks: { color: '#c9d1d9', font: { family: 'Tahoma' } }, grid: { display: false } }
         },
-        plugins: { legend: { labels: { color: '#c9d1d9', font: { family: 'Tahoma' } } } }
+        plugins: { legend: { labels: { color: '#c9d1d9', font:
+
+Farhad Davari, [7/22/2026 1:45 PM]
+{ family: 'Tahoma' } } } }
       }
     });
   }
@@ -399,9 +407,9 @@ function loadExcel(input) {
       if (!rows.length) { showExcelMsg('داده‌ای یافت نشد', true); return; }
       excelRows = rows;
       const sel = document.getElementById('player-select');
-      sel.innerHTML = rows.map((r, i) => `<option value="${i}">${r['نام و نام خانوادگی'] || 'بازیکن ' + (i+1)}</option>`).join('');
+      sel.innerHTML = rows.map((r, i) => `<option value="${i}">${r['نام و نام خانوادگی']  'بازیکن ' + (i+1)}</option>`).join('');
       document.getElementById('player-select-wrap').style.display = 'block';
-      showExcelMsg(`✅ ${rows.length} بازیکن بارگذاری شد`, false);
+      showExcelMsg(✅ ${rows.length} بازیکن بارگذاری شد, false);
       showPlayerFromExcel();
     } catch(err) { showExcelMsg('خطا در خواندن فایل: ' + err.message, true); }
   };
@@ -409,7 +417,7 @@ function loadExcel(input) {
 }
 
 function showExcelMsg(msg, isErr) {
-  document.getElementById('excel-msg').innerHTML = `<div class="alert ${isErr ? 'alert-err' : 'alert-ok'}">${msg}</div>`;
+  document.getElementById('excel-msg').innerHTML = <div class="alert ${isErr ? 'alert-err' : 'alert-ok'}">${msg}</div>;
 }
 
 function showPlayerFromExcel() {
@@ -434,12 +442,12 @@ function showPlayerFromExcel() {
   const total = Object.keys(WEIGHTS).reduce((sum, k) => sum + (avgs[k] / 5) * WEIGHTS[k], 0);
 
   currentData = {
-    id: r['شناسه بازیکن'] || '—',
-    name: r['نام و نام خانوادگی'] || '—',
-    age: r['رده سنی'] || '—',
-    pos: r['پست بازی'] || '—',
-    date: r['تاریخ ارزیابی'] || '—',
-    video: r['لینک پوشه ویدیو'] || '',
+    id: r['شناسه بازیکن']  '—',
+    name: r['نام و نام خانوادگی']  '—',
+    age: r['رده سنی']  '—',
+    pos: r['پست بازی']  '—',
+    date: r['تاریخ ارزیابی']  '—',
+    video: r['لینک پوشه ویدیو']  '',
     avgs, total
   };
   renderDashboard(currentData);
@@ -448,7 +456,7 @@ function showPlayerFromExcel() {
 // ─── TABS ────────────────────────────────────────────────────────────────────
 function showTab(name) {
   ['manual','excel','dashboard'].forEach(t => {
-    document.getElementById(`tab-${t}`).style.display = t === name ? 'block' : 'none';
+    document.getElementById(tab-${t}).style.display = t === name ? 'block' : 'none';
   });
   document.querySelectorAll('.tabs .tab').forEach((el, i) => {
     el.classList.toggle('active', ['manual','excel','dashboard'][i] === name);
