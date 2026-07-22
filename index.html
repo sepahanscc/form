@@ -255,7 +255,6 @@ function doLogin() {
   const name = document.getElementById('evaluator-name').value.trim();
   const code = document.getElementById('access-code').value.trim().toUpperCase();
   if (!name) { showLoginErr('نام ارزیاب را وارد کنید'); return; }
-  if (!CODES[code]) { showLoginErr('کد دسترسی نامعتبر است'); return; }
   document.getElementById('login-screen').style.display = 'none';
   document.getElementById('app').style.display = 'block';
   document.getElementById('f-date').valueAsDate = new Date();
