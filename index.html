@@ -1,6 +1,5 @@
-s<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="fa" dir="rtl">
-<head>
 <head>
 <meta charset="UTF-8">
 
@@ -32,7 +31,7 @@ s<!DOCTYPE html>
 </head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>سپاهان</title>
+<title>⚽ سیستم ارزیابی بازیکنان — آکادمی سپاهان</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
 <style>
@@ -167,7 +166,7 @@ body, * {
       <div class="section-title">🧠 هوش — وزن ۳۰٪</div>
       <div id="criteria-intel"></div>
 
-      <div class="section-title">⚽️ تکنیک — وزن ۲۵٪</div>
+      <div class="section-title">⚽ تکنیک — وزن ۲۵٪</div>
       <div id="criteria-tech"></div>
 
       <div class="section-title">🎯 تاکتیک — وزن ۲۵٪</div>
@@ -175,7 +174,8 @@ body, * {
 
       <div class="section-title">💪 جسمانی — وزن ۱۰٪</div>
       <div id="criteria-phys"></div>
-	  <div class="section-title">📊 آماری — وزن ۱۰٪</div>
+
+      <div class="section-title">📊 آماری — وزن ۱۰٪</div>
       <div id="criteria-stat"></div>
 
       <br>
@@ -268,16 +268,112 @@ function buildCriteria(containerId, key) {
     const name = ${key}_${i};
     let stars = '';
     for (let v = 5; v >= 1; v--) {
-      stars += `<input type="radio" name="${name}" id="${name}_${v}" value="${v}">
-                <label for="${name}_${v}">${v}</label>`;
+      stars += <input type="radio" name="${name}" id="${name}_${v}" value="${v}">
+                <label for="${name}_${v}">${v}</label>;
     }
-    el.innerHTML += `<div class="criteria-row">
+    el.innerHTML += <div class="criteria-row">
       <span class="criteria-label">${label}</span>
       <div class="stars">${stars}</div>
-    </div>`;
+    </div>;
   });
 }
-{ family: 'Tahoma' } } } }
+
+// ─── CALCULATE ───────────────────────────────────────────────────────────────
+function getGroupAvg(key) {
+  const vals = [];
+  CRITERIA[key].forEach((_, i) => {
+    const el = document.querySelector(input[name="${key}_${i}"]:checked);
+    if (el) vals.push(+el.value);
+  });
+  if (!vals.length) return null;
+  return vals.reduce((a, b) => a + b, 0) / vals.length;
+}
+
+function calculate() {
+  const name = document.getElementById('f-name').value.trim();
+  if (!name) { alert('نام بازیکن را وارد کنید'); return; }
+
+  const avgs = {};
+  for (const key of Object.keys(CRITERIA)) {
+    avgs[key] = getGroupAvg(key);
+    if (avgs[key] === null) { alert(لطفاً همه معیارهای ${key} را امتیاز دهید); return; }
+  }
+
+  const total = Object.keys(WEIGHTS).reduce((sum, k) => sum + (avgs[k] / 5) * WEIGHTS[k], 0);
+
+  currentData = {
+    id: document.getElementById('f-id').value || '—',
+    name,
+    age: document.getElementById('f-age').value,
+    pos: document.getElementById('f-pos').value,
+    date: document.getElementById('f-date').value,
+    video: document.getElementById('f-video').value,
+    avgs, total
+  };
+  renderDashboard(currentData);
+  sendToGoogleSheet(currentData);  
+}
+
+// ─── RENDER DASHBOARD ────────────────────────────────────────────────────────
+function renderDashboard(d) {
+  document.getElementById('tab-dash').style.display = 'inline-block';
+  showTab('dashboard');
+
+  document.getElementById('dash-info').innerHTML = 
+    <span>👤 ${d.name}</span><span>🆔 ${d.id}</span>
+    <span>📅 ${d.date}</span><span>🏷️ ${d.age}</span><span>📍 ${d.pos}</span>;
+
+  const status = d.total >= 80 ? ['نخبه', 'elite'] : d.total >= 65 ? ['خوب', 'good'] : d.total >= 50 ? ['متوسط', 'avg'] : ['ضعیف', 'weak'];
+  const labels = { intel: 'هوش', tech: 'تکنیک', tact: 'تاکتیک', phys: 'جسمانی', stat: 'آماری' };
+
+  let grid = '';
+  for (const [k, lbl] of Object.entries(labels)) {
+    const pct = ((d.avgs[k] / 5) * 100).toFixed(1);
+    grid += <div class="score-box"><div class="val">${pct}</div><div class="lbl">${lbl}</div></div>;
+  }
+  grid += <div class="score-box score-total"><div class="val">${d.total.toFixed(1)}</div><div class="lbl">نمره کل / ۱۰۰</div></div>;
+  grid += <div class="score-box"><div class="val" style="font-size:1rem;padding-top:8px"><span class="status-badge status-${status[1]}">${status[0]}</span></div><div class="lbl">وضعیت</div></div>;
+  document.getElementById('score-grid').innerHTML = grid;
+
+  document.getElementById('video-link').innerHTML = d.video
+    ? <a href="${d.video}" target="_blank" style="color:#58a6ff;font-size:0.85rem">🎬 مشاهده ویدیو</a> : '';
+
+  drawChart('radar', d);
+}
+
+function drawChart(type, d) {
+  const labels = ['هوش', 'تکنیک', 'تاکتیک', 'جسمانی', 'آماری'];
+  const keys = ['intel', 'tech', 'tact', 'phys', 'stat'];
+  const data = keys.map(k => +((d.avgs[k] / 5) * 100).toFixed(1));
+
+  if (chartInstance) chartInstance.destroy();
+  const ctx = document.getElementById('myChart').getContext('2d');
+
+  if (type === 'radar') {
+    chartInstance = new Chart(ctx, {
+      type: 'radar',
+      data: {
+        labels,
+        datasets: [{ label: d.name, data, backgroundColor: 'rgba(31,111,235,0.2)', borderColor: '#1f6feb', pointBackgroundColor: '#58a6ff', borderWidth: 2 }]
+      },
+      options: {
+        scales: { r: { min: 0, max: 100, ticks: { color: '#8b949e', stepSize: 20 }, grid: { color: '#30363d' }, pointLabels: { color: '#c9d1d9', font: { family: 'Tahoma', size: 12 } } } },
+        plugins: { legend: { labels: { color: '#c9d1d9', font: { family: 'Tahoma' } } } }
+      }
+    });
+  } else {
+    chartInstance = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels,
+        datasets: [{ label: 'امتیاز از ۱۰۰', data, backgroundColor: ['#1f6feb','#238636','#f0883e','#8957e5','#3fb950'], borderRadius: 6 }]
+      },
+      options: {
+        scales: {
+          y: { min: 0, max: 100, ticks: { color: '#8b949e' }, grid: { color: '#30363d' } },
+          x: { ticks: { color: '#c9d1d9', font: { family: 'Tahoma' } }, grid: { display: false } }
+        },
+        plugins: { legend: { labels: { color: '#c9d1d9', font: { family: 'Tahoma' } } } }
       }
     });
   }
@@ -302,7 +398,7 @@ function loadExcel(input) {
       if (!rows.length) { showExcelMsg('داده‌ای یافت نشد', true); return; }
       excelRows = rows;
       const sel = document.getElementById('player-select');
-      sel.innerHTML = rows.map((r, i) => `<option value="${i}">${r['نام و نام خانوادگی']  'بازیکن ' + (i+1)}</option>`).join('');
+      sel.innerHTML = rows.map((r, i) => <option value="${i}">${r['نام و نام خانوادگی'] || 'بازیکن ' + (i+1)}</option>).join('');
       document.getElementById('player-select-wrap').style.display = 'block';
       showExcelMsg(✅ ${rows.length} بازیکن بارگذاری شد, false);
       showPlayerFromExcel();
@@ -337,12 +433,12 @@ function showPlayerFromExcel() {
   const total = Object.keys(WEIGHTS).reduce((sum, k) => sum + (avgs[k] / 5) * WEIGHTS[k], 0);
 
   currentData = {
-    id: r['شناسه بازیکن']  '—',
-    name: r['نام و نام خانوادگی']  '—',
-    age: r['رده سنی']  '—',
-    pos: r['پست بازی']  '—',
-    date: r['تاریخ ارزیابی']  '—',
-    video: r['لینک پوشه ویدیو']  '',
+    id: r['شناسه بازیکن'] || '—',
+    name: r['نام و نام خانوادگی'] || '—',
+    age: r['رده سنی'] || '—',
+    pos: r['پست بازی'] || '—',
+    date: r['تاریخ ارزیابی'] || '—',
+    video: r['لینک پوشه ویدیو'] || '',
     avgs, total
   };
   renderDashboard(currentData);
