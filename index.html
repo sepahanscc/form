@@ -303,7 +303,7 @@ function calculate() {
 
   const total = Object.keys(WEIGHTS).reduce((sum, k) => sum + (avgs[k] / 5) * WEIGHTS[k], 0);
 
-currentData = {
+  currentData = {
     id: document.getElementById('f-id').value || '—',
     name,
     age: document.getElementById('f-age').value,
@@ -311,11 +311,8 @@ currentData = {
     date: document.getElementById('f-date').value,
     video: document.getElementById('f-video').value,
     avgs, total
-};
-
-saveToGoogleSheet(currentData);
-
-renderDashboard(currentData);
+  };
+  renderDashboard(currentData);
 }
 
 // ─── RENDER DASHBOARD ────────────────────────────────────────────────────────
@@ -457,42 +454,7 @@ function showTab(name) {
     el.classList.toggle('active', ['manual','excel','dashboard'][i] === name);
   });
 }
-function saveToGoogleSheet(d) {
 
-const scriptURL = "https://script.google.com/macros/s/AKfycbxqBZubb2SVNvotwpIjn4bRkfXLPLui6ctb7ZzOOkUvg9Ps8cyeAPHJL8VndSNGJO97uQ/exec";
-
-fetch(scriptURL, {
-    method: "POST",
-    mode: "no-cors",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-
-      id: d.id,
-      player: d.name,
-      age: d.age,
-      position: d.pos,
-      date: d.date,
-
-      intel: d.avgs.intel,
-      tech: d.avgs.tech,
-      tact: d.avgs.tact,
-      phys: d.avgs.phys,
-      stat: d.avgs.stat,
-
-      total: d.total
-
-    })
-})
-.then(() => {
-    alert("✅ اطلاعات بازیکن در Google Sheet ذخیره شد");
-})
-.catch(error => {
-    alert("خطا در ذخیره اطلاعات");
-});
-
-}
 // ─── INIT ────────────────────────────────────────────────────────────────────
 buildCriteria('criteria-intel', 'intel');
 buildCriteria('criteria-tech', 'tech');
