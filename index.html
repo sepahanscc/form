@@ -418,7 +418,7 @@
                 const result = await response.json();
                 console.log("📥 داده دریافت شد:", result);
 
-                if (result && result.length > 0) {
+                if (result && result.length > 0 && !result.error) {
                     evaluations = result.map(row => ({
                         date: row.date || "",
                         evaluator: row.evaluator || "",
@@ -439,7 +439,7 @@
                     updatePlayersTable();
                     console.log("✅ تعداد داده‌ها:", evaluations.length);
                 } else {
-                    console.log("ℹ️ داده‌ای موجود نیست");
+                    console.log("ℹ️ داده‌ای موجود نیست یا خطا:", result);
                     evaluations = [];
                     updatePlayersTable();
                 }
@@ -452,26 +452,25 @@
         }
 
         // ===============================
-        // SEND TO GOOGLE SHEET (اصلاح شده)
+        // SEND TO GOOGLE SHEET
         // ===============================
         async function sendToGoogleSheet(data) {
             try {
-                // تبدیل داده به فرمت مورد نظر Google Apps Script
                 const payload = {
                     action: "save",
+                    date: data.date || new Date().toISOString().split('T')[0],
+                    evaluator: data.evaluator || "",
                     id: data.id || "",
                     name: data.name || "",
                     age: data.age || "",
                     position: data.position || "",
-                    date: data.date || "",
-                    video: data.video || "",
-                    evaluator: data.evaluator || "",
                     intel: data.scores?.intel || 0,
                     tech: data.scores?.tech || 0,
                     tact: data.scores?.tact || 0,
                     phys: data.scores?.phys || 0,
                     stat: data.scores?.stat || 0,
-                    total: data.total || 0
+                    total: data.total || 0,
+                    video: data.video || ""
                 };
 
                 console.log("📤 ارسال داده:", payload);
@@ -493,12 +492,15 @@
 
                 if (result.status === "ok") {
                     console.log("✅ داده با موفقیت ذخیره شد");
+                    return true;
                 } else {
                     console.error("❌ خطا در ذخیره:", result);
+                    return false;
                 }
             } catch (error) {
                 console.error("❌ خطا در ارتباط با سرور:", error);
                 alert("⚠️ خطا در ارتباط با سرور. داده به صورت محلی ذخیره شد.");
+                return false;
             }
         }
 
@@ -789,4 +791,155 @@
             let age = document.getElementById("filter-age").value;
             let position = document.getElementById("filter-position").value;
             let result = evaluations.filter(p => {
-                let ageMatch = age === "" || p.age ===
+                let ageMatch = age === "" || p.age === age;
+                let posMatch = position === "" || p.position === position;
+                return ageMatch && posMatch;
+            });
+            result.sort((a, b) => b.total - a.total);
+            updatePlayersTable(result);
+        }
+
+        // ===============================
+        // MANAGEMENT DASHBOARD
+        // ===============================
+        function loadManagementDashboard() {
+            let count = evaluations.length;
+            document.getElementById("total-count").innerHTML = count;
+
+            if (count === 0) {
+                document.getElementById("average-score").innerHTML = "0";
+                document.getElementById("elite-count").innerHTML = "0";
+                document.getElementById("top-players").innerHTML =
+                    `<tr><th>رتبه</th><th>نام</th><th>امتیاز</th></tr><tr><td colspan="3" style="color:#8b949e;padding:20px;">هیچ داده‌ای موجود نیست</td></tr>`;
+                return;
+            }
+
+            let sum = 0,
+                elite = 0;
+            evaluations.forEach(p => {
+                sum += Number(p.total);
+                if (p.total >= 80) elite++;
+            });
+            document.getElementById("average-score").innerHTML = (sum / count).toFixed(1);
+            document.getElementById("elite-count").innerHTML = elite;
+
+            let top = [...evaluations].sort((a, b) => b.total - a.total).slice(0, 10);
+            let table = `<tr><th>رتبه</th><th>نام بازیکن</th><th>امتیاز</th></tr>`;
+            top.forEach((p, i) => {
+                table += `<tr><td>${i+1}</td><td>${p.name}</td><td>${p.total}</td></tr>`;
+            });
+            document.getElementById("top-players").innerHTML = table;
+
+            drawAcademyChart();
+        }
+
+        function drawAcademyChart() {
+            let groups = {};
+            evaluations.forEach(p => {
+                if (!groups[p.age]) groups[p.age] = [];
+                groups[p.age].push(Number(p.total));
+            });
+            let labels = Object.keys(groups).sort();
+            let values = labels.map(age => {
+                let arr = groups[age];
+                return (arr.reduce((a, b) => a + b, 0) / arr.length).toFixed(1);
+            });
+
+            if (academyChart) academyChart.destroy();
+            let ctx = document.getElementById("academyChart").getContext("2d");
+            academyChart = new Chart(ctx, {
+                type: "bar",
+                data: {
+                    labels: labels,
+                    datasets: [{ label: "میانگین امتیاز رده‌ها", data: values, backgroundColor: "#f5c400" }]
+                },
+                options: {
+                    scales: {
+                        y: { min: 0, max: 100, ticks: { color: "#aaa" } },
+                        x: { ticks: { color: "#fff" } }
+                    },
+                    plugins: { legend: { labels: { color: "#fff" } } }
+                }
+            });
+        }
+
+        // ===============================
+        // PRINT REPORT
+        // ===============================
+        function printReport() {
+            if (!currentPlayer) {
+                alert("⚠️ ابتدا یک بازیکن را انتخاب کنید");
+                return;
+            }
+            let p = currentPlayer;
+            let win = window.open("", "", "width=900,height=700");
+            if (!win) {
+                alert("لطفاً باز شدن پنجره پاپ‌آپ را مجاز کنید");
+                return;
+            }
+            win.document.write(`
+                <html dir="rtl">
+                <head>
+                    <title>گزارش ارزیابی ${p.name}</title>
+                    <style>
+                        body{font-family:tahoma;padding:30px;direction:rtl;background:#fff;color:#333;}
+                        h1{color:#d4a900;}
+                        .box{border:1px solid #ccc;padding:15px;margin:10px;border-radius:8px;background:#f9f9f9;}
+                        .box h2{color:#d4a900;}
+                        .score-item{display:inline-block;padding:10px 20px;margin:5px;background:#eee;border-radius:5px;}
+                    </style>
+                </head>
+                <body>
+                    <h1>📋 گزارش ارزیابی فنی بازیکن</h1>
+                    <div class="box">
+                        <h2>${p.name}</h2>
+                        <p><strong>شناسه:</strong> ${p.id || "-"}</p>
+                        <p><strong>رده:</strong> ${p.age}</p>
+                        <p><strong>پست:</strong> ${p.position}</p>
+                        <p><strong>ارزیاب:</strong> ${p.evaluator}</p>
+                        <p><strong>تاریخ:</strong> ${p.date}</p>
+                        <p><strong>امتیاز کل:</strong> <span style="color:#d4a900;font-size:20px;">${p.total}</span> از 100</p>
+                    </div>
+                    <div class="box">
+                        <h3>📊 جزئیات عملکرد</h3>
+                        <div class="score-item">🧠 هوش: ${p.scores.intel.toFixed(2)}</div>
+                        <div class="score-item">⚽ تکنیک: ${p.scores.tech.toFixed(2)}</div>
+                        <div class="score-item">📋 تاکتیک: ${p.scores.tact.toFixed(2)}</div>
+                        <div class="score-item">💪 جسمانی: ${p.scores.phys.toFixed(2)}</div>
+                        <div class="score-item">📊 آماری: ${p.scores.stat.toFixed(2)}</div>
+                    </div>
+                    <div class="box" style="text-align:center;color:#888;font-size:12px;">
+                        گزارش تولید شده توسط سیستم ارزیابی آکادمی سپاهان
+                    </div>
+                </body>
+                </html>
+            `);
+            win.document.close();
+            win.print();
+        }
+
+        // ===============================
+        // KEYBOARD SHORTCUT: Enter
+        // ===============================
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                if (document.getElementById("login-screen").style.display !== "none") {
+                    login();
+                } else if (!document.getElementById("evaluation").classList.contains("hidden")) {
+                    calculateScore();
+                }
+            }
+        });
+
+        // ===============================
+        // ON LOAD
+        // ===============================
+        window.onload = function() {
+            document.getElementById("evaluation-date").valueAsDate = new Date();
+            loadPlayersFromSheet();
+            console.log("🚀 سیستم ارزیابی آکادمی سپاهان راه‌اندازی شد");
+        };
+    </script>
+
+</body>
+</html>
