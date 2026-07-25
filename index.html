@@ -1136,7 +1136,132 @@ max:100
 }
 
 
+// ===============================
+// EDIT PLAYER
+// ===============================
 
+
+let editIndex = null;
+
+
+
+function editPlayer(index){
+
+
+let player =
+evaluations[index];
+
+
+editIndex=index;
+
+
+
+document.getElementById("evaluation")
+.classList.remove("hidden");
+
+
+document.getElementById("dashboard")
+.classList.add("hidden");
+
+
+
+// اطلاعات بازیکن
+
+
+document.getElementById(
+"player-id"
+).value=player.id;
+
+
+
+document.getElementById(
+"player-name"
+).value=player.name;
+
+
+
+document.getElementById(
+"player-age"
+).value=player.age;
+
+
+
+document.getElementById(
+"player-position"
+).value=player.position;
+
+
+
+document.getElementById(
+"evaluation-date"
+).value=player.date;
+
+
+
+document.getElementById(
+"video-link"
+).value=player.video;
+
+
+
+// پاک کردن امتیازها
+
+document.querySelectorAll(
+'input[type="radio"]'
+)
+.forEach(r=>r.checked=false);
+
+
+
+
+// قرار دادن امتیازات قبلی
+
+
+Object.keys(player.scores)
+.forEach(function(group){
+
+
+let values =
+CRITERIA[group];
+
+
+values.forEach(function(item,index){
+
+
+let score =
+Math.round(
+player.scores[group]
+);
+
+
+
+let radio =
+document.querySelector(
+`input[name="${group}_${index}"][value="${score}"]`
+);
+
+
+
+if(radio){
+
+radio.checked=true;
+
+}
+
+
+});
+
+
+});
+
+
+
+alert(
+"اطلاعات برای ویرایش آماده شد"
+);
+
+
+}
 
 <script>
 
@@ -1631,7 +1756,24 @@ Number(total.toFixed(1))
 
 
 
+if(editIndex !== null){
+
+
+evaluations[editIndex]=currentPlayer;
+
+
+editIndex=null;
+
+
+}
+
+else{
+
+
 evaluations.push(currentPlayer);
+
+
+}
 
 sendToGoogleSheet(currentPlayer);
 
@@ -2068,7 +2210,13 @@ let data=[
 ];
 
 
+<button 
+class="btn btn-blue"
+onclick="printReport()">
 
+📄 چاپ گزارش بازیکن
+
+</button>
 
 
 
@@ -2678,6 +2826,187 @@ return b.total-a.total;
 
 updatePlayersTable(result);
 
+
+
+}
+
+    // ===============================
+// PRINT REPORT
+// ===============================
+
+
+function printReport(){
+
+
+if(!currentPlayer){
+
+alert(
+"ابتدا یک بازیکن را انتخاب کنید"
+);
+
+return;
+
+}
+
+
+
+let p=currentPlayer;
+
+
+
+let win =
+window.open(
+"",
+"",
+"width=900,height=700"
+);
+
+
+
+win.document.write(`
+
+
+<html dir="rtl">
+
+<head>
+
+<title>
+گزارش ارزیابی ${p.name}
+</title>
+
+
+<style>
+
+body{
+
+font-family:tahoma;
+padding:30px;
+
+}
+
+
+h1{
+
+color:#d4a900;
+
+}
+
+
+.box{
+
+border:1px solid #ccc;
+padding:15px;
+margin:10px;
+
+}
+
+
+</style>
+
+
+</head>
+
+
+<body>
+
+
+<h1>
+گزارش ارزیابی فنی بازیکن
+</h1>
+
+
+
+<div class="box">
+
+
+<h2>
+${p.name}
+</h2>
+
+
+<p>
+رده:
+${p.age}
+</p>
+
+
+<p>
+پست:
+${p.position}
+</p>
+
+
+<p>
+ارزیاب:
+${p.evaluator}
+</p>
+
+
+<p>
+امتیاز کل:
+${p.total}
+از 100
+</p>
+
+
+</div>
+
+
+
+<div class="box">
+
+<h3>
+جزئیات عملکرد
+</h3>
+
+
+<p>
+هوش:
+${p.scores.intel.toFixed(2)}
+</p>
+
+
+<p>
+تکنیک:
+${p.scores.tech.toFixed(2)}
+</p>
+
+
+<p>
+تاکتیک:
+${p.scores.tact.toFixed(2)}
+</p>
+
+
+<p>
+جسمانی:
+${p.scores.phys.toFixed(2)}
+</p>
+
+
+<p>
+آماری:
+${p.scores.stat.toFixed(2)}
+</p>
+
+
+</div>
+
+
+
+</body>
+
+</html>
+
+
+`);
+
+
+
+win.document.close();
+
+
+win.print();
 
 
 }
