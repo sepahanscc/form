@@ -27,7 +27,6 @@
             margin: auto;
             padding: 20px;
         }
-        /* HEADER */
         .header {
             display: flex;
             flex-direction: column;
@@ -45,7 +44,6 @@
             font-size: 22px;
             line-height: 2;
         }
-        /* CARD */
         .card {
             background: #161b22;
             border: 1px solid #30363d;
@@ -58,7 +56,6 @@
             margin-bottom: 20px;
             font-size: 18px;
         }
-        /* BUTTON */
         .btn {
             border: none;
             border-radius: 8px;
@@ -70,6 +67,9 @@
         .btn-primary {
             background: #238636;
             color: white;
+        }
+        .btn-primary:hover {
+            background: #2ea043;
         }
         .btn-danger {
             background: #da3633;
@@ -91,11 +91,17 @@
             border: 1px solid #30363d;
             border-radius: 7px;
             color: white;
+            font-size: 14px;
+        }
+        input:focus,
+        select:focus {
+            outline: 2px solid #1f6feb;
         }
         label {
             display: block;
             margin-bottom: 6px;
             color: #8b949e;
+            font-size: 14px;
         }
         .grid-2 {
             display: grid;
@@ -114,12 +120,16 @@
             border-radius: 8px;
             cursor: pointer;
             transition: 0.2s;
+            color: #8b949e;
+        }
+        .tab:hover {
+            background: #30363d;
+            color: #e6edf3;
         }
         .tab.active {
             background: #1f6feb;
             color: white;
         }
-        /* DASHBOARD */
         .score-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -147,20 +157,33 @@
             border-collapse: collapse;
             width: 100%;
             color: #e6edf3;
-            border-color: #30363d;
         }
         th {
             background: #21262d;
             color: #f5c400;
             padding: 10px;
+            text-align: center;
         }
         td {
             padding: 10px;
             border-bottom: 1px solid #30363d;
+            text-align: center;
         }
         .login-error {
             color: #f85149;
             margin-top: 15px;
+            padding: 10px;
+            background: #1c0d0d;
+            border-radius: 8px;
+            border: 1px solid #f85149;
+        }
+        .login-success {
+            color: #3fb950;
+            margin-top: 15px;
+            padding: 10px;
+            background: #0d1c12;
+            border-radius: 8px;
+            border: 1px solid #3fb950;
         }
         @media(max-width:700px) {
             .grid-2 {
@@ -176,7 +199,7 @@
 
     <!-- HEADER -->
     <div class="header">
-        <img src="sepahan-logo.png" class="sepahan-logo" alt="سپاهان">
+        <img src="sepahan-logo.png" class="sepahan-logo" alt="سپاهان" onerror="this.style.display='none'">
         <h1>سیستم ارزیابی فنی بازیکنان آکادمی فوتبال باشگاه فرهنگی ورزشی فولاد مبارکه سپاهان</h1>
     </div>
 
@@ -191,7 +214,8 @@
             <input id="access-code" type="password" placeholder="SP001 تا SP004">
             <br><br>
             <button class="btn btn-primary" onclick="login()">ورود به سیستم</button>
-            <div id="login-error" class="login-error"></div>
+            <div id="login-error" class="login-error" style="display:none;"></div>
+            <div id="login-success" class="login-success" style="display:none;"></div>
         </div>
     </div>
 
@@ -254,7 +278,7 @@
             </div>
         </div>
 
-        <!-- DASHBOARD TAB (hidden by default, shown after evaluation) -->
+        <!-- DASHBOARD TAB -->
         <div id="dashboard" class="hidden">
             <div class="card">
                 <h2>📊 داشبورد عملکرد بازیکن</h2>
@@ -360,8 +384,8 @@
             "SP004": "آنالیست عملکرد"
         };
 
-        // Google Apps Script Web App URL (replace with your own)
-        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx.../exec";
+        // Google Apps Script Web App URL (اگر ندارید، از داده محلی استفاده می‌شود)
+        const GOOGLE_SCRIPT_URL = ""; // آدرس خود را وارد کنید
 
         // ===============================
         // STATE
@@ -373,6 +397,7 @@
         let radarChart = null;
         let barChart = null;
         let academyChart = null;
+        let isLoggedIn = false;
 
         // ===============================
         // BUILD CRITERIA FORM
@@ -384,11 +409,11 @@
                 html += `<h3 style="color:#f5c400;margin:20px 0">${group.toUpperCase()}</h3>`;
                 CRITERIA[group].forEach((item, index) => {
                     html += `
-                        <div style="display:flex;justify-content:space-between;padding:10px;border-bottom:1px solid #30363d">
-                            <span>${item}</span>
+                        <div style="display:flex;justify-content:space-between;padding:10px;border-bottom:1px solid #30363d;flex-wrap:wrap;gap:5px;">
+                            <span style="color:#e6edf3;">${item}</span>
                             <div>
                                 ${[1,2,3,4,5].map(v => `
-                                    <label style="margin:5px;cursor:pointer">
+                                    <label style="margin:5px;cursor:pointer;color:#8b949e;">
                                         <input type="radio" name="${group}_${index}" value="${v}"> ${v}
                                     </label>
                                 `).join("")}
@@ -408,32 +433,57 @@
             let name = document.getElementById("evaluator-name").value.trim();
             let code = document.getElementById("access-code").value.trim().toUpperCase();
             let errorDiv = document.getElementById("login-error");
+            let successDiv = document.getElementById("login-success");
+
+            errorDiv.style.display = "none";
+            successDiv.style.display = "none";
             errorDiv.innerHTML = "";
+            successDiv.innerHTML = "";
 
             if (name === "") {
-                errorDiv.innerHTML = "نام ارزیاب را وارد کنید";
+                errorDiv.style.display = "block";
+                errorDiv.innerHTML = "⚠️ نام ارزیاب را وارد کنید";
                 return;
             }
             if (!ACCESS_CODES[code]) {
-                errorDiv.innerHTML = "کد دسترسی اشتباه است";
+                errorDiv.style.display = "block";
+                errorDiv.innerHTML = "⚠️ کد دسترسی اشتباه است. کدهای مجاز: SP001 تا SP004";
                 return;
             }
 
             evaluator = name;
+            isLoggedIn = true;
+
+            successDiv.style.display = "block";
+            successDiv.innerHTML = "✅ ورود موفق! در حال بارگذاری...";
+
+            // Hide login and show app
             document.getElementById("login-screen").style.display = "none";
             document.getElementById("app").classList.remove("hidden");
             document.getElementById("evaluation-date").valueAsDate = new Date();
 
-            // Load data from Google Sheet
+            // Load data (with fallback)
             loadPlayersFromSheet();
         }
 
         // ===============================
-        // LOAD DATA FROM GOOGLE SHEET
+        // LOAD DATA FROM GOOGLE SHEET (with fallback)
         // ===============================
         async function loadPlayersFromSheet() {
+            // اگر آدرس Google Script وجود ندارد، از داده نمونه استفاده کن
+            if (!GOOGLE_SCRIPT_URL) {
+                loadSampleData();
+                return;
+            }
+
             try {
-                let response = await fetch(GOOGLE_SCRIPT_URL);
+                let response = await fetch(GOOGLE_SCRIPT_URL, {
+                    method: "GET",
+                    headers: { "Content-Type": "application/json" }
+                });
+
+                if (!response.ok) throw new Error("Network response was not ok");
+
                 let result = await response.json();
                 if (result && result.length) {
                     evaluations = result.map(row => ({
@@ -454,16 +504,59 @@
                         total: Number(row.total) || 0
                     }));
                     updatePlayersTable();
+                } else {
+                    loadSampleData();
                 }
             } catch (error) {
-                console.log("خطا در دریافت اطلاعات", error);
+                console.log("خطا در دریافت اطلاعات از Google Sheet، استفاده از داده نمونه", error);
+                loadSampleData();
             }
+        }
+
+        // ===============================
+        // LOAD SAMPLE DATA
+        // ===============================
+        function loadSampleData() {
+            // داده‌های نمونه برای تست
+            evaluations = [{
+                id: "SP-001",
+                name: "امیرحسین احمدی",
+                age: "U15",
+                position: "هافبک مرکزی",
+                date: "2026-07-25",
+                video: "",
+                evaluator: "مدیر آنالیز",
+                scores: { intel: 4.2, tech: 4.5, tact: 4.0, phys: 3.8, stat: 3.5 },
+                total: 82.5
+            }, {
+                id: "SP-002",
+                name: "محمد رضایی",
+                age: "U16",
+                position: "مهاجم",
+                date: "2026-07-24",
+                video: "",
+                evaluator: "سرمربی",
+                scores: { intel: 3.8, tech: 4.8, tact: 3.5, phys: 4.2, stat: 4.0 },
+                total: 79.0
+            }, {
+                id: "SP-003",
+                name: "علی کریمی",
+                age: "U14",
+                position: "مدافع وسط",
+                date: "2026-07-23",
+                video: "",
+                evaluator: "مدیر فنی",
+                scores: { intel: 4.5, tech: 3.5, tact: 4.8, phys: 4.0, stat: 3.0 },
+                total: 81.0
+            }];
+            updatePlayersTable();
         }
 
         // ===============================
         // SEND TO GOOGLE SHEET
         // ===============================
         function sendToGoogleSheet(data) {
+            if (!GOOGLE_SCRIPT_URL) return;
             fetch(GOOGLE_SCRIPT_URL, {
                 method: "POST",
                 headers: { "Content-Type": "application/json;charset=utf-8" },
@@ -488,7 +581,6 @@
 
             // update active tab style
             document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
-            // find the clicked tab by text content (simple)
             let tabs = document.querySelectorAll(".tab");
             let map = {
                 "📝 ارزیابی بازیکن": "evaluation",
@@ -509,7 +601,7 @@
         function calculateScore() {
             let name = document.getElementById("player-name").value.trim();
             if (name === "") {
-                alert("نام بازیکن را وارد کنید");
+                alert("⚠️ نام بازیکن را وارد کنید");
                 return;
             }
 
@@ -523,7 +615,7 @@
                     if (checked) values.push(Number(checked.value));
                 });
                 if (values.length !== CRITERIA[group].length) {
-                    alert("لطفاً تمام معیارها را امتیاز دهید");
+                    alert(`⚠️ لطفاً تمام معیارهای ${group.toUpperCase()} را امتیاز دهید`);
                     return;
                 }
                 let avg = values.reduce((a, b) => a + b, 0) / values.length;
@@ -532,7 +624,7 @@
             }
 
             currentPlayer = {
-                id: document.getElementById("player-id").value,
+                id: document.getElementById("player-id").value || `SP-${String(evaluations.length + 1).padStart(3, '0')}`,
                 name: name,
                 age: document.getElementById("player-age").value,
                 position: document.getElementById("player-position").value,
@@ -555,7 +647,6 @@
 
             updatePlayersTable();
             showDashboard(currentPlayer);
-            // switch to dashboard tab
             showTab('dashboard');
         }
 
@@ -689,22 +780,26 @@
                     <th>نام بازیکن</th><th>رده</th><th>پست</th><th>امتیاز</th><th>عملیات</th>
                 </tr>
             `;
-            list.forEach((player, index) => {
-                let realIndex = evaluations.indexOf(player);
-                html += `
-                    <tr>
-                        <td>${player.name}</td>
-                        <td>${player.age}</td>
-                        <td>${player.position}</td>
-                        <td><b style="color:#3fb950">${player.total}</b></td>
-                        <td>
-                            <button class="btn btn-blue" onclick="viewPlayer(${realIndex})">📊 مشاهده</button>
-                            <button class="btn btn-warning" onclick="editPlayer(${realIndex})">✏️ ویرایش</button>
-                            <button class="btn btn-danger" onclick="deletePlayer(${realIndex})">🗑 حذف</button>
-                        </td>
-                    </tr>
-                `;
-            });
+            if (list.length === 0) {
+                html += `<tr><td colspan="5" style="color:#8b949e;padding:20px;">هیچ ارزیابی ثبت نشده است</td></tr>`;
+            } else {
+                list.forEach((player, index) => {
+                    let realIndex = evaluations.indexOf(player);
+                    html += `
+                        <tr>
+                            <td>${player.name}</td>
+                            <td>${player.age}</td>
+                            <td>${player.position}</td>
+                            <td><b style="color:#3fb950">${player.total}</b></td>
+                            <td>
+                                <button class="btn btn-blue" onclick="viewPlayer(${realIndex})">📊 مشاهده</button>
+                                <button class="btn btn-warning" onclick="editPlayer(${realIndex})">✏️ ویرایش</button>
+                                <button class="btn btn-danger" onclick="deletePlayer(${realIndex})">🗑 حذف</button>
+                            </td>
+                        </tr>
+                    `;
+                });
+            }
             table.innerHTML = html;
             document.getElementById("total-players").innerHTML = "تعداد کل ارزیابی‌ها : " + list.length;
         }
@@ -713,6 +808,7 @@
         // VIEW PLAYER
         // ===============================
         function viewPlayer(index) {
+            if (index < 0 || index >= evaluations.length) return;
             let player = evaluations[index];
             currentPlayer = player;
             showDashboard(player);
@@ -723,10 +819,17 @@
         // EDIT PLAYER
         // ===============================
         function editPlayer(index) {
+            if (index < 0 || index >= evaluations.length) return;
             let player = evaluations[index];
             editIndex = index;
+
+            // Switch to evaluation tab
             document.getElementById("evaluation").classList.remove("hidden");
             document.getElementById("dashboard").classList.add("hidden");
+            document.getElementById("players").classList.add("hidden");
+            document.getElementById("management").classList.add("hidden");
+
+            // Fill form
             document.getElementById("player-id").value = player.id || "";
             document.getElementById("player-name").value = player.name || "";
             document.getElementById("player-age").value = player.age || "";
@@ -734,8 +837,10 @@
             document.getElementById("evaluation-date").value = player.date || "";
             document.getElementById("video-link").value = player.video || "";
 
+            // Reset radios
             document.querySelectorAll('input[type="radio"]').forEach(r => r.checked = false);
-            // set previous scores
+
+            // Set previous scores
             Object.keys(player.scores).forEach(group => {
                 let val = Math.round(player.scores[group]);
                 CRITERIA[group].forEach((item, idx) => {
@@ -743,32 +848,47 @@
                     if (radio) radio.checked = true;
                 });
             });
-            showTab('evaluation');
+
+            // Update active tab
+            document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+            document.querySelectorAll(".tab").forEach(t => {
+                if (t.textContent.trim() === "📝 ارزیابی بازیکن") t.classList.add("active");
+            });
+
+            alert("✏️ اطلاعات برای ویرایش آماده شد");
         }
 
         // ===============================
         // DELETE PLAYER
         // ===============================
         function deletePlayer(index) {
+            if (index < 0 || index >= evaluations.length) return;
             if (!confirm("آیا از حذف این ارزیابی مطمئن هستید؟")) return;
+
             let player = evaluations[index];
-            // delete from sheet
-            fetch(GOOGLE_SCRIPT_URL, {
-                method: "POST",
-                headers: { "Content-Type": "application/json;charset=utf-8" },
-                body: JSON.stringify({ action: "delete", id: player.id, name: player.name })
-            }).catch(err => console.log("خطا در حذف", err));
+            // delete from sheet if possible
+            if (GOOGLE_SCRIPT_URL) {
+                fetch(GOOGLE_SCRIPT_URL, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json;charset=utf-8" },
+                    body: JSON.stringify({ action: "delete", id: player.id, name: player.name })
+                }).catch(err => console.log("خطا در حذف", err));
+            }
 
             evaluations.splice(index, 1);
             updatePlayersTable();
-            alert("ارزیابی حذف شد");
+            alert("🗑 ارزیابی حذف شد");
         }
 
         // ===============================
         // SEARCH PLAYER
         // ===============================
         function searchPlayers() {
-            let text = document.getElementById("search-player").value.toLowerCase();
+            let text = document.getElementById("search-player").value.toLowerCase().trim();
+            if (text === "") {
+                updatePlayersTable(evaluations);
+                return;
+            }
             let result = evaluations.filter(p => p.name.toLowerCase().includes(text));
             updatePlayersTable(result);
         }
@@ -794,11 +914,12 @@
         function loadManagementDashboard() {
             let count = evaluations.length;
             document.getElementById("total-count").innerHTML = count;
+
             if (count === 0) {
                 document.getElementById("average-score").innerHTML = "0";
                 document.getElementById("elite-count").innerHTML = "0";
                 document.getElementById("top-players").innerHTML =
-                    `<tr><th>رتبه</th><th>نام</th><th>امتیاز</th></tr><tr><td colspan="3">هیچ داده‌ای موجود نیست</td></tr>`;
+                    `<tr><th>رتبه</th><th>نام</th><th>امتیاز</th></tr><tr><td colspan="3" style="color:#8b949e;padding:20px;">هیچ داده‌ای موجود نیست</td></tr>`;
                 return;
             }
 
@@ -828,7 +949,7 @@
                 if (!groups[p.age]) groups[p.age] = [];
                 groups[p.age].push(Number(p.total));
             });
-            let labels = Object.keys(groups);
+            let labels = Object.keys(groups).sort();
             let values = labels.map(age => {
                 let arr = groups[age];
                 return (arr.reduce((a, b) => a + b, 0) / arr.length).toFixed(1);
@@ -843,7 +964,10 @@
                     datasets: [{ label: "میانگین امتیاز رده‌ها", data: values, backgroundColor: "#f5c400" }]
                 },
                 options: {
-                    scales: { y: { min: 0, max: 100, ticks: { color: "#aaa" } }, x: { ticks: { color: "#fff" } } },
+                    scales: {
+                        y: { min: 0, max: 100, ticks: { color: "#aaa" } },
+                        x: { ticks: { color: "#fff" } }
+                    },
                     plugins: { legend: { labels: { color: "#fff" } } }
                 }
             });
@@ -854,36 +978,48 @@
         // ===============================
         function printReport() {
             if (!currentPlayer) {
-                alert("ابتدا یک بازیکن را انتخاب کنید");
+                alert("⚠️ ابتدا یک بازیکن را انتخاب کنید");
                 return;
             }
             let p = currentPlayer;
             let win = window.open("", "", "width=900,height=700");
+            if (!win) {
+                alert("لطفاً باز شدن پنجره پاپ‌آپ را مجاز کنید");
+                return;
+            }
             win.document.write(`
                 <html dir="rtl">
-                <head><title>گزارش ارزیابی ${p.name}</title>
-                <style>
-                    body{font-family:tahoma;padding:30px;direction:rtl;}
-                    h1{color:#d4a900;}
-                    .box{border:1px solid #ccc;padding:15px;margin:10px;border-radius:8px;}
-                </style>
+                <head>
+                    <title>گزارش ارزیابی ${p.name}</title>
+                    <style>
+                        body{font-family:tahoma;padding:30px;direction:rtl;background:#fff;color:#333;}
+                        h1{color:#d4a900;}
+                        .box{border:1px solid #ccc;padding:15px;margin:10px;border-radius:8px;background:#f9f9f9;}
+                        .box h2{color:#d4a900;}
+                        .score-item{display:inline-block;padding:10px 20px;margin:5px;background:#eee;border-radius:5px;}
+                    </style>
                 </head>
                 <body>
-                    <h1>گزارش ارزیابی فنی بازیکن</h1>
+                    <h1>📋 گزارش ارزیابی فنی بازیکن</h1>
                     <div class="box">
                         <h2>${p.name}</h2>
-                        <p>رده: ${p.age}</p>
-                        <p>پست: ${p.position}</p>
-                        <p>ارزیاب: ${p.evaluator}</p>
-                        <p>امتیاز کل: ${p.total} از 100</p>
+                        <p><strong>شناسه:</strong> ${p.id || "-"}</p>
+                        <p><strong>رده:</strong> ${p.age}</p>
+                        <p><strong>پست:</strong> ${p.position}</p>
+                        <p><strong>ارزیاب:</strong> ${p.evaluator}</p>
+                        <p><strong>تاریخ:</strong> ${p.date}</p>
+                        <p><strong>امتیاز کل:</strong> <span style="color:#d4a900;font-size:20px;">${p.total}</span> از 100</p>
                     </div>
                     <div class="box">
-                        <h3>جزئیات عملکرد</h3>
-                        <p>هوش: ${p.scores.intel.toFixed(2)}</p>
-                        <p>تکنیک: ${p.scores.tech.toFixed(2)}</p>
-                        <p>تاکتیک: ${p.scores.tact.toFixed(2)}</p>
-                        <p>جسمانی: ${p.scores.phys.toFixed(2)}</p>
-                        <p>آماری: ${p.scores.stat.toFixed(2)}</p>
+                        <h3>📊 جزئیات عملکرد</h3>
+                        <div class="score-item">🧠 هوش: ${p.scores.intel.toFixed(2)}</div>
+                        <div class="score-item">⚽ تکنیک: ${p.scores.tech.toFixed(2)}</div>
+                        <div class="score-item">📋 تاکتیک: ${p.scores.tact.toFixed(2)}</div>
+                        <div class="score-item">💪 جسمانی: ${p.scores.phys.toFixed(2)}</div>
+                        <div class="score-item">📊 آماری: ${p.scores.stat.toFixed(2)}</div>
+                    </div>
+                    <div class="box" style="text-align:center;color:#888;font-size:12px;">
+                        گزارش تولید شده توسط سیستم ارزیابی آکادمی سپاهان
                     </div>
                 </body>
                 </html>
@@ -893,11 +1029,31 @@
         }
 
         // ===============================
+        // KEYBOARD SHORTCUT: Enter to login
+        // ===============================
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                if (!document.getElementById("app").classList.contains("hidden")) {
+                    // اگر در فرم ارزیابی هستیم
+                    let activeTab = document.querySelector('.tab.active');
+                    if (activeTab && activeTab.textContent.trim() === "📝 ارزیابی بازیکن") {
+                        calculateScore();
+                    }
+                } else {
+                    login();
+                }
+            }
+        });
+
+        // ===============================
         // ON LOAD
         // ===============================
         window.onload = function() {
-            // set default date
             document.getElementById("evaluation-date").valueAsDate = new Date();
+            // اگر آدرس Google Script تنظیم نشده، با داده نمونه شروع کن
+            if (!GOOGLE_SCRIPT_URL) {
+                loadSampleData();
+            }
         };
     </script>
 
