@@ -2636,20 +2636,68 @@ showDashboard(player);
 // ===============================
 
 
+// ===============================
+// DELETE FROM GOOGLE SHEET
+// ===============================
+
+
 function deletePlayer(index){
 
 
+let player =
+evaluations[index];
 
-let confirmDelete=
-confirm(
+
+
+if(!confirm(
 "آیا از حذف این ارزیابی مطمئن هستید؟"
-);
+)){
 
-
-
-if(!confirmDelete)
 return;
 
+}
+
+
+
+fetch(GOOGLE_SCRIPT_URL,{
+
+method:"POST",
+
+headers:{
+
+"Content-Type":
+"text/plain;charset=utf-8"
+
+},
+
+
+body:
+JSON.stringify({
+
+action:"save",
+
+...data
+
+})
+
+
+action:"delete",
+
+
+id:player.id,
+
+
+name:player.name
+
+
+})
+
+
+})
+
+
+
+.then(()=>{
 
 
 evaluations.splice(index,1);
@@ -2657,6 +2705,31 @@ evaluations.splice(index,1);
 
 
 updatePlayersTable();
+
+
+
+alert(
+"ارزیابی حذف شد"
+);
+
+
+
+})
+
+
+
+.catch(()=>{
+
+
+alert(
+"خطا در حذف اطلاعات"
+);
+
+
+});
+
+
+}
 
 
 
@@ -2771,7 +2844,118 @@ row.style.display="none";
 }
     window.onload=function(){
 
-loadPlayersFromSheet();
+// ===============================
+// LOAD DATA FROM SHEET
+// ===============================
+
+
+async function loadPlayersFromSheet(){
+
+
+try{
+
+
+let response =
+await fetch(
+GOOGLE_SCRIPT_URL
+);
+
+
+
+let result =
+await response.json();
+
+
+
+
+evaluations =
+result.map(function(row){
+
+
+
+return {
+
+
+id:row.id,
+
+name:row.name,
+
+age:row.age,
+
+position:row.position,
+
+date:row.date,
+
+video:row.video,
+
+
+evaluator:
+row.evaluator,
+
+
+
+scores:{
+
+
+intel:
+Number(row.intel),
+
+
+tech:
+Number(row.tech),
+
+
+tact:
+Number(row.tact),
+
+
+phys:
+Number(row.phys),
+
+
+stat:
+Number(row.stat)
+
+
+},
+
+
+total:
+Number(row.total)
+
+
+
+};
+
+
+
+});
+
+
+
+
+
+updatePlayersTable();
+
+
+
+}
+
+catch(error){
+
+
+console.log(
+"خطا در دریافت اطلاعات",
+error
+);
+
+
+
+}
+
+
+
+}
 
 }
     function filterPlayers(){
