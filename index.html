@@ -63,7 +63,6 @@
             cursor: pointer;
             font-weight: bold;
             margin: 5px;
-            transition: 0.2s;
         }
         .btn-primary {
             background: #238636;
@@ -76,22 +75,13 @@
             background: #da3633;
             color: white;
         }
-        .btn-danger:hover {
-            background: #f85149;
-        }
         .btn-blue {
             background: #1f6feb;
             color: white;
         }
-        .btn-blue:hover {
-            background: #388bfd;
-        }
         .btn-warning {
             background: #d29922;
             color: white;
-        }
-        .btn-warning:hover {
-            background: #e3b341;
         }
         input,
         select {
@@ -195,14 +185,6 @@
             border-radius: 8px;
             border: 1px solid #3fb950;
         }
-        .loading {
-            color: #58a6ff;
-            margin-top: 15px;
-            padding: 10px;
-            background: #0d1a2b;
-            border-radius: 8px;
-            border: 1px solid #58a6ff;
-        }
         @media(max-width:700px) {
             .grid-2 {
                 grid-template-columns: 1fr;
@@ -234,7 +216,6 @@
             <button class="btn btn-primary" onclick="login()">ورود به سیستم</button>
             <div id="login-error" class="login-error" style="display:none;"></div>
             <div id="login-success" class="login-success" style="display:none;"></div>
-            <div id="login-loading" class="loading" style="display:none;">⏳ در حال بارگذاری داده‌ها...</div>
         </div>
     </div>
 
@@ -403,10 +384,8 @@
             "SP004": "آنالیست عملکرد"
         };
 
-        // ===============================
-        // ✅ GOOGLE SCRIPT URL (تنظیم شده با آدرس شما)
-        // ===============================
-        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxPiQ-BXrvastNX6Bjpq86KjwaFg-aPNYAq5UdFB6r0qa18BMIrj8YWNkaQz6B8pO5-/exec";
+        // Google Apps Script Web App URL (اگر ندارید، از داده محلی استفاده می‌شود)
+        const GOOGLE_SCRIPT_URL = ""; // آدرس خود را وارد کنید
 
         // ===============================
         // STATE
@@ -455,11 +434,9 @@
             let code = document.getElementById("access-code").value.trim().toUpperCase();
             let errorDiv = document.getElementById("login-error");
             let successDiv = document.getElementById("login-success");
-            let loadingDiv = document.getElementById("login-loading");
 
             errorDiv.style.display = "none";
             successDiv.style.display = "none";
-            loadingDiv.style.display = "none";
             errorDiv.innerHTML = "";
             successDiv.innerHTML = "";
 
@@ -479,35 +456,36 @@
 
             successDiv.style.display = "block";
             successDiv.innerHTML = "✅ ورود موفق! در حال بارگذاری...";
-            loadingDiv.style.display = "block";
-            loadingDiv.innerHTML = "⏳ در حال اتصال به سرور و بارگذاری داده‌ها...";
 
-            // Hide login and show app after loading
-            loadPlayersFromSheet(() => {
-                document.getElementById("login-screen").style.display = "none";
-                document.getElementById("app").classList.remove("hidden");
-                document.getElementById("evaluation-date").valueAsDate = new Date();
-                loadingDiv.style.display = "none";
-            });
+            // Hide login and show app
+            document.getElementById("login-screen").style.display = "none";
+            document.getElementById("app").classList.remove("hidden");
+            document.getElementById("evaluation-date").valueAsDate = new Date();
+
+            // Load data (with fallback)
+            loadPlayersFromSheet();
         }
 
         // ===============================
-        // LOAD DATA FROM GOOGLE SHEET
+        // LOAD DATA FROM GOOGLE SHEET (with fallback)
         // ===============================
-        async function loadPlayersFromSheet(callback) {
+        async function loadPlayersFromSheet() {
+            // اگر آدرس Google Script وجود ندارد، از داده نمونه استفاده کن
+            if (!GOOGLE_SCRIPT_URL) {
+                loadSampleData();
+                return;
+            }
+
             try {
-                console.log("🔄 در حال بارگذاری داده‌ها از Google Sheet...");
                 let response = await fetch(GOOGLE_SCRIPT_URL, {
                     method: "GET",
                     headers: { "Content-Type": "application/json" }
                 });
 
-                if (!response.ok) throw new Error("خطا در ارتباط با سرور");
+                if (!response.ok) throw new Error("Network response was not ok");
 
                 let result = await response.json();
-                console.log("📥 داده‌های دریافت شده:", result);
-
-                if (result && result.length > 0) {
+                if (result && result.length) {
                     evaluations = result.map(row => ({
                         id: row.id || "",
                         name: row.name || "",
@@ -526,29 +504,26 @@
                         total: Number(row.total) || 0
                     }));
                     updatePlayersTable();
-                    console.log("✅ داده‌ها با موفقیت بارگذاری شدند. تعداد:", evaluations.length);
                 } else {
-                    console.log("ℹ️ داده‌ای در Google Sheet وجود ندارد، از داده نمونه استفاده می‌شود");
                     loadSampleData();
                 }
             } catch (error) {
-                console.log("❌ خطا در دریافت اطلاعات از Google Sheet:", error);
-                console.log("ℹ️ استفاده از داده نمونه به جای داده‌های سرور");
+                console.log("خطا در دریافت اطلاعات از Google Sheet، استفاده از داده نمونه", error);
                 loadSampleData();
             }
-            if (callback) callback();
         }
 
         // ===============================
         // LOAD SAMPLE DATA
         // ===============================
         function loadSampleData() {
+            // داده‌های نمونه برای تست
             evaluations = [{
                 id: "SP-001",
                 name: "امیرحسین احمدی",
                 age: "U15",
                 position: "هافبک مرکزی",
-                date: new Date().toISOString().split('T')[0],
+                date: "2026-07-25",
                 video: "",
                 evaluator: "مدیر آنالیز",
                 scores: { intel: 4.2, tech: 4.5, tact: 4.0, phys: 3.8, stat: 3.5 },
@@ -558,7 +533,7 @@
                 name: "محمد رضایی",
                 age: "U16",
                 position: "مهاجم",
-                date: new Date().toISOString().split('T')[0],
+                date: "2026-07-24",
                 video: "",
                 evaluator: "سرمربی",
                 scores: { intel: 3.8, tech: 4.8, tact: 3.5, phys: 4.2, stat: 4.0 },
@@ -568,44 +543,25 @@
                 name: "علی کریمی",
                 age: "U14",
                 position: "مدافع وسط",
-                date: new Date().toISOString().split('T')[0],
+                date: "2026-07-23",
                 video: "",
                 evaluator: "مدیر فنی",
                 scores: { intel: 4.5, tech: 3.5, tact: 4.8, phys: 4.0, stat: 3.0 },
                 total: 81.0
             }];
             updatePlayersTable();
-            console.log("📋 داده نمونه بارگذاری شد. تعداد:", evaluations.length);
         }
 
         // ===============================
         // SEND TO GOOGLE SHEET
         // ===============================
         function sendToGoogleSheet(data) {
-            console.log("📤 ارسال داده به Google Sheet:", data);
+            if (!GOOGLE_SCRIPT_URL) return;
             fetch(GOOGLE_SCRIPT_URL, {
                 method: "POST",
-                mode: "no-cors", // برای جلوگیری از خطای CORS
                 headers: { "Content-Type": "application/json;charset=utf-8" },
                 body: JSON.stringify({ action: "save", ...data })
-            }).then(() => {
-                console.log("✅ داده با موفقیت ارسال شد");
-            }).catch(err => {
-                console.log("❌ خطا در ذخیره در Google Sheet:", err);
-            });
-        }
-
-        // ===============================
-        // DELETE FROM GOOGLE SHEET
-        // ===============================
-        function deleteFromGoogleSheet(id, name) {
-            console.log("🗑 درخواست حذف:", id, name);
-            fetch(GOOGLE_SCRIPT_URL, {
-                method: "POST",
-                mode: "no-cors",
-                headers: { "Content-Type": "application/json;charset=utf-8" },
-                body: JSON.stringify({ action: "delete", id: id, name: name })
-            }).catch(err => console.log("❌ خطا در حذف از Google Sheet:", err));
+            }).catch(err => console.log("خطا در ذخیره", err));
         }
 
         // ===============================
@@ -692,7 +648,6 @@
             updatePlayersTable();
             showDashboard(currentPlayer);
             showTab('dashboard');
-            alert("✅ ارزیابی با موفقیت ثبت شد!");
         }
 
         // ===============================
@@ -911,8 +866,14 @@
             if (!confirm("آیا از حذف این ارزیابی مطمئن هستید؟")) return;
 
             let player = evaluations[index];
-            // Delete from Google Sheet
-            deleteFromGoogleSheet(player.id, player.name);
+            // delete from sheet if possible
+            if (GOOGLE_SCRIPT_URL) {
+                fetch(GOOGLE_SCRIPT_URL, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json;charset=utf-8" },
+                    body: JSON.stringify({ action: "delete", id: player.id, name: player.name })
+                }).catch(err => console.log("خطا در حذف", err));
+            }
 
             evaluations.splice(index, 1);
             updatePlayersTable();
@@ -1068,14 +1029,18 @@
         }
 
         // ===============================
-        // KEYBOARD SHORTCUT: Enter to login/submit
+        // KEYBOARD SHORTCUT: Enter to login
         // ===============================
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Enter') {
-                if (document.getElementById("login-screen").style.display !== "none") {
+                if (!document.getElementById("app").classList.contains("hidden")) {
+                    // اگر در فرم ارزیابی هستیم
+                    let activeTab = document.querySelector('.tab.active');
+                    if (activeTab && activeTab.textContent.trim() === "📝 ارزیابی بازیکن") {
+                        calculateScore();
+                    }
+                } else {
                     login();
-                } else if (!document.getElementById("evaluation").classList.contains("hidden")) {
-                    calculateScore();
                 }
             }
         });
@@ -1085,9 +1050,10 @@
         // ===============================
         window.onload = function() {
             document.getElementById("evaluation-date").valueAsDate = new Date();
-            // Try to load data from Google Sheet on page load
-            loadPlayersFromSheet();
-            console.log("🚀 سیستم ارزیابی آکادمی سپاهان راه‌اندازی شد");
+            // اگر آدرس Google Script تنظیم نشده، با داده نمونه شروع کن
+            if (!GOOGLE_SCRIPT_URL) {
+                loadSampleData();
+            }
         };
     </script>
 
