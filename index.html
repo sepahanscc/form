@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="fa" dir="rtl">
 
@@ -2319,6 +2318,34 @@
             background: #c62828;
         }
 
+        /* =========================================================
+           استایل درگ زمین‌ها
+        ========================================================= */
+        .modal-item.venue-draggable {
+            cursor: grab;
+            user-select: none;
+            touch-action: none;
+        }
+        .modal-item.venue-draggable:active {
+            cursor: grabbing;
+        }
+        .modal-item.venue-dragging {
+            opacity: 0.4;
+        }
+        .modal-item.venue-drag-over {
+            box-shadow: inset 0 3px 0 #6a1b9a, inset 0 -3px 0 #6a1b9a;
+            background: #f3e5f5 !important;
+        }
+        .modal-item .drag-handle {
+            display: inline-block;
+            margin-left: 6px;
+            font-size: 16px;
+            color: #6a1b9a;
+            opacity: 0.7;
+            cursor: grab;
+            vertical-align: middle;
+        }
+
         @media print {
             .floating-session-btn,
             .session-hover-card,
@@ -2402,9 +2429,41 @@
             .session-table th, .session-table td { padding: 3px 2px !important; font-size: 10px !important; }
             .session-count-input { width: 32px !important; font-size: 11px !important; padding: 2px 1px !important; }
             .session-modal { width: 98%; }
-            .floating-session-btn { width: 50px; height: 50px; font-size: 22px; bottom: 20px; left: 20px; }
-            .floating-session-btn .badge { width: 20px; height: 20px; font-size: 9px; top: -4px; right: -4px; }
-            .session-hover-card { bottom: 80px; left: 16px; right: 16px; min-width: auto; max-width: none; padding: 12px 14px; max-height: 60vh; }
+
+            /* === دکمه شناور در موبایل: به‌صورت fixed و شناور === */
+            .floating-session-btn {
+                position: fixed !important;
+                bottom: 20px !important;
+                left: 20px !important;
+                width: 50px;
+                height: 50px;
+                font-size: 22px;
+                z-index: 999999 !important;
+                transform: none !important;
+            }
+            .floating-session-btn:hover {
+                transform: scale(1.08) !important;
+            }
+            .floating-session-btn .badge {
+                width: 20px;
+                height: 20px;
+                font-size: 9px;
+                top: -4px;
+                right: -4px;
+            }
+
+            /* کارت وضعیت سانس‌ها در موبایل: fixed و شناور بالای دکمه */
+            .session-hover-card {
+                position: fixed !important;
+                bottom: 80px !important;
+                left: 16px !important;
+                right: 16px !important;
+                min-width: auto;
+                max-width: none;
+                padding: 12px 14px;
+                max-height: 60vh;
+                z-index: 999998 !important;
+            }
             .session-hover-card .card-item { font-size: 11px; }
             .session-hover-card .card-item .v-name { min-width: 55px; }
             .session-hover-card .card-item .day-status .d-badge { font-size: 10px; min-width: 18px; line-height: 18px; }
@@ -2852,13 +2911,13 @@
                         <div class="modal-icon venue-icon">🏟</div>
                         <div>
                             <div class="modal-title">مدیریت زمین‌ها</div>
-                            <div class="modal-subtitle venue-sub">ورزشگاه‌های موجود</div>
+                            <div class="modal-subtitle venue-sub">ورزشگاه‌های موجود (قابل درگ برای جابه‌جایی)</div>
                         </div>
                     </div>
                     <button type="button" class="modal-close" onclick="closeVenueManager()">✕</button>
                 </div>
                 <div class="modal-content">
-                    <p class="modal-note">همه زمین‌ها قابل حذف و ویرایش هستند.</p>
+                    <p class="modal-note">همه زمین‌ها قابل حذف، ویرایش و جابه‌جایی (با درگ) هستند.</p>
                     <div class="modal-list" id="venueListContainer"></div>
                     <div class="modal-add-row">
                         <input type="text" id="newVenueInput" class="venue-add-input" placeholder="نام زمین جدید..." maxlength="30">
@@ -4097,17 +4156,29 @@
             }
             for (var i = 0; i < venues.length; i++) {
                 var item = document.createElement('div');
-                item.className = 'modal-item';
+                item.className = 'modal-item venue-draggable';
+                item.draggable = true;
+                item.dataset.venueRow = i;
+
+                // هندل درگ
+                var dragHandle = document.createElement('span');
+                dragHandle.className = 'drag-handle';
+                dragHandle.textContent = '☷';
+                item.appendChild(dragHandle);
+
                 var indexSpan = document.createElement('span');
                 indexSpan.className = 'item-index';
                 indexSpan.textContent = toPersianDigits(String(i + 1)) + '.';
                 item.appendChild(indexSpan);
+
                 var nameSpan = document.createElement('span');
                 nameSpan.className = 'item-name';
                 nameSpan.textContent = venues[i];
                 item.appendChild(nameSpan);
+
                 var actions = document.createElement('div');
                 actions.className = 'item-actions';
+
                 var editBtn = document.createElement('button');
                 editBtn.className = 'item-edit-btn venue-edit';
                 editBtn.textContent = '✏️';
@@ -4115,6 +4186,7 @@
                 editBtn.onclick = function(e) { e.stopPropagation(); var idx = parseInt(this.dataset.index, 10);
                     startEditingVenue(idx); };
                 actions.appendChild(editBtn);
+
                 var removeBtn = document.createElement('button');
                 removeBtn.className = 'item-remove-btn';
                 removeBtn.textContent = '✕';
@@ -4122,9 +4194,87 @@
                 removeBtn.onclick = function(e) { e.stopPropagation(); var idx = parseInt(this.dataset.index, 10);
                     removeVenue(idx); };
                 actions.appendChild(removeBtn);
+
                 item.appendChild(actions);
                 container.appendChild(item);
             }
+
+            // ===== راه‌اندازی درگ برای زمین‌ها =====
+            setupVenueDragAndDrop();
+        }
+
+        function setupVenueDragAndDrop() {
+            var container = document.getElementById('venueListContainer');
+            if (!container) return;
+            var items = container.querySelectorAll('.venue-draggable');
+
+            items.forEach(function(item) {
+                item.addEventListener('dragstart', function(e) {
+                    var fromRow = parseInt(this.dataset.venueRow, 10);
+                    window.draggedVenueRow = fromRow;
+                    this.classList.add('venue-dragging');
+                    if (e.dataTransfer) {
+                        e.dataTransfer.effectAllowed = 'move';
+                        try { e.dataTransfer.setData('text/plain', String(fromRow)); } catch (err) {}
+                    }
+                });
+
+                item.addEventListener('dragend', function() {
+                    this.classList.remove('venue-dragging');
+                    container.querySelectorAll('.venue-draggable').forEach(function(el) {
+                        el.classList.remove('venue-drag-over');
+                    });
+                    window.draggedVenueRow = null;
+                });
+
+                item.addEventListener('dragover', function(e) {
+                    e.preventDefault();
+                    if (e.dataTransfer) e.dataTransfer.dropEffect = 'move';
+                    var targetRow = parseInt(this.dataset.venueRow, 10);
+                    var fromRow = window.draggedVenueRow;
+                    if (Number.isInteger(fromRow) && Number.isInteger(targetRow) && fromRow !== targetRow) {
+                        this.classList.add('venue-drag-over');
+                    }
+                });
+
+                item.addEventListener('dragleave', function() {
+                    this.classList.remove('venue-drag-over');
+                });
+
+                item.addEventListener('drop', function(e) {
+                    e.preventDefault();
+                    var targetRow = parseInt(this.dataset.venueRow, 10);
+                    var fromRow = window.draggedVenueRow;
+                    this.classList.remove('venue-drag-over');
+                    if (!Number.isInteger(fromRow) && e.dataTransfer) {
+                        fromRow = parseInt(e.dataTransfer.getData('text/plain'), 10);
+                    }
+                    if (!Number.isInteger(fromRow) || !Number.isInteger(targetRow) ||
+                        fromRow === targetRow || fromRow < 0 || targetRow < 0 ||
+                        fromRow >= venues.length || targetRow >= venues.length) {
+                        return;
+                    }
+                    moveVenue(fromRow, targetRow);
+                });
+            });
+        }
+
+        function moveVenue(fromRow, targetRow) {
+            // جابه‌جایی زمین
+            var movedVenue = venues.splice(fromRow, 1)[0];
+            venues.splice(targetRow, 0, movedVenue);
+
+            // جابه‌جایی تنظیمات سانس
+            var movedSession = sessionConfig.splice(fromRow, 1)[0];
+            sessionConfig.splice(targetRow, 0, movedSession);
+
+            saveVenues(venues);
+            saveSessionConfigToStorage();
+            saveData(tableData);
+
+            renderVenueList();
+            buildTable();
+            updateFloatingBadge();
         }
 
         function removeVenue(index) {
