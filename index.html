@@ -1325,8 +1325,6 @@
         .modal-item:hover {
             background: #f5f5f5;
         }
-
-        /* درگ برای جابه‌جایی ترتیب زمین‌ها */
         .modal-item.venue-draggable {
             cursor: grab;
             user-select: none;
@@ -1342,13 +1340,13 @@
             color: #6a1b9a;
         }
         .modal-item.venue-dragging {
-            opacity: 0.45;
+            opacity: .45;
             cursor: grabbing;
-            background: #f0e6f5 !important;
+            background: #f3e5f5;
         }
         .modal-item.venue-drag-over {
-            box-shadow: inset 0 3px 0 #6a1b9a, inset 0 -3px 0 #6a1b9a;
-            background: #f3e5f5 !important;
+            box-shadow: inset 0 3px 0 #ce93d8, inset 0 -3px 0 #ce93d8;
+            background: #f3e5f5;
         }
 
         .modal-item .item-name {
@@ -2164,7 +2162,7 @@
             position: fixed !important;
             bottom: 30px;
             left: 30px;
-            z-index: 99999 !important;
+            z-index: 99999;
             width: 60px;
             height: 60px;
             border-radius: 50%;
@@ -2181,10 +2179,9 @@
             font-weight: 900;
             user-select: none;
             font-family: "Vazirmatn", Tahoma, sans-serif !important;
-            /* اطمینان از شناور بودن روی موبایل حتی با اسکرول و نوار آدرس */
+            /* برای شناور ماندن درست روی موبایل حتی با اسکرول */
             -webkit-transform: translateZ(0);
             transform: translateZ(0);
-            will-change: transform;
             touch-action: manipulation;
         }
         .floating-session-btn:hover {
@@ -2217,7 +2214,7 @@
             position: fixed !important;
             bottom: 100px;
             left: 30px;
-            z-index: 99998 !important;
+            z-index: 99998;
             background: #fff;
             border: 2px solid #111;
             border-radius: 12px;
@@ -2386,18 +2383,9 @@
             .slot.locked-view .print-text .opponent-text { font-size: 10px !important; }
             .slot.locked-view .print-text .time-text { font-size: 11px !important; }
             .slot.locked-view { min-height: 48px !important; }
-            .floating-session-btn { 
-                width: 55px; height: 55px; font-size: 24px; 
-                bottom: max(25px, env(safe-area-inset-bottom, 0px)); 
-                left: 25px; 
-                position: fixed !important;
-            }
+            .floating-session-btn { width: 55px; height: 55px; font-size: 24px; bottom: max(25px, env(safe-area-inset-bottom, 0px)); left: 25px; position: fixed !important; }
             .floating-session-btn .badge { width: 22px; height: 22px; font-size: 10px; top: -5px; right: -5px; }
-            .session-hover-card { 
-                bottom: calc(90px + env(safe-area-inset-bottom, 0px)); 
-                left: 25px; min-width: 250px; max-width: 380px; 
-                position: fixed !important;
-            }
+            .session-hover-card { bottom: max(90px, calc(70px + env(safe-area-inset-bottom, 0px))); left: 25px; min-width: 250px; max-width: 380px; position: fixed !important; }
             .report-modal { width: 96%; }
             .report-item { font-size: 11px; }
             .report-item .r-day { min-width: 35px; font-size: 11px; }
@@ -2443,21 +2431,9 @@
             .session-table th, .session-table td { padding: 3px 2px !important; font-size: 10px !important; }
             .session-count-input { width: 32px !important; font-size: 11px !important; padding: 2px 1px !important; }
             .session-modal { width: 98%; }
-            .floating-session-btn { 
-                width: 50px; height: 50px; font-size: 22px; 
-                bottom: max(20px, env(safe-area-inset-bottom, 0px)); 
-                left: max(16px, env(safe-area-inset-left, 0px)); 
-                position: fixed !important;
-                z-index: 99999 !important;
-            }
+            .floating-session-btn { width: 50px; height: 50px; font-size: 22px; bottom: max(20px, env(safe-area-inset-bottom, 0px)); left: 20px; position: fixed !important; }
             .floating-session-btn .badge { width: 20px; height: 20px; font-size: 9px; top: -4px; right: -4px; }
-            .session-hover-card { 
-                bottom: calc(80px + env(safe-area-inset-bottom, 0px)); 
-                left: 16px; right: 16px; 
-                min-width: auto; max-width: none; 
-                padding: 12px 14px; max-height: 60vh; 
-                position: fixed !important;
-            }
+            .session-hover-card { bottom: max(80px, calc(60px + env(safe-area-inset-bottom, 0px))); left: 16px; right: 16px; min-width: auto; max-width: none; padding: 12px 14px; max-height: 60vh; position: fixed !important; }
             .session-hover-card .card-item { font-size: 11px; }
             .session-hover-card .card-item .v-name { min-width: 55px; }
             .session-hover-card .card-item .day-status .d-badge { font-size: 10px; min-width: 18px; line-height: 18px; }
@@ -2911,7 +2887,7 @@
                     <button type="button" class="modal-close" onclick="closeVenueManager()">✕</button>
                 </div>
                 <div class="modal-content">
-                    <p class="modal-note">همه زمین‌ها قابل حذف و ویرایش هستند.</p>
+                    <p class="modal-note">همه زمین‌ها قابل حذف و ویرایش هستند. برای تغییر ترتیب، نام زمین را بکشید و جابه‌جا کنید.</p>
                     <div class="modal-list" id="venueListContainer"></div>
                     <div class="modal-add-row">
                         <input type="text" id="newVenueInput" class="venue-add-input" placeholder="نام زمین جدید..." maxlength="30">
@@ -2966,12 +2942,8 @@
 
     </div>
 
-    <!-- اعلان -->
-    <div class="import-notification" id="importNotification"></div>
-    </div><!-- end #app-content -->
-
-    <!-- دکمه شناور (خارج از app-content تا در موبایل هم همیشه fixed نسبت به viewport باشد) -->
-    <div class="floating-session-btn no-print" id="floatingBtn" onmouseenter="showSessionCard()" onmouseleave="hideSessionCard()" onclick="openSessionEditor()">
+    <!-- دکمه شناور -->
+    <div class="floating-session-btn no-print" id="floatingBtn" onmouseenter="showSessionCard()" onmouseleave="hideSessionCard()" onclick="handleFloatingBtnClick(event)">
         📊
         <span class="badge" id="floatingBadge">0</span>
     </div>
@@ -2984,6 +2956,10 @@
         </div>
         <div id="hoverCardContent"></div>
     </div>
+
+    <!-- اعلان -->
+    <div class="import-notification" id="importNotification"></div>
+    </div><!-- end #app-content -->
 
     <script>
         // ============================================================
@@ -3000,9 +2976,13 @@
 
         function enableDesktopMode() {
             document.body.classList.add('desktop-mode');
-            var meta = document.getElementById('viewportMeta');
-            if (meta) {
-                meta.setAttribute('content', 'width=1200, user-scalable=yes');
+            // روی موبایل viewport را عوض نکن تا position:fixed دکمه شناور نسبت به صفحه نمایش واقعی کار کند
+            // و کاربر بتواند صفحه را افقی اسکرول کند؛ روی دسکتاپ همان عرض ثابت حفظ می‌شود
+            if (window.innerWidth > 900) {
+                var meta = document.getElementById('viewportMeta');
+                if (meta) {
+                    meta.setAttribute('content', 'width=1200, user-scalable=yes');
+                }
             }
         }
 
@@ -4153,7 +4133,7 @@
                 item.className = 'modal-item venue-draggable';
                 item.draggable = true;
                 item.dataset.venueIndex = i;
-                item.title = 'برای جابه‌جایی ترتیب زمین، این ردیف را بکشید و روی ردیف دیگر رها کنید';
+                item.title = 'برای جابه‌جایی زمین، این ردیف را بکشید و روی زمین دیگر رها کنید';
 
                 item.addEventListener('dragstart', function(e) {
                     var fromIdx = parseInt(this.dataset.venueIndex, 10);
@@ -4195,10 +4175,10 @@
                         fromIdx < 0 || targetIdx < 0 || fromIdx >= venues.length || targetIdx >= venues.length) {
                         return;
                     }
-                    // جابه‌جایی زمین و تنظیمات سانس مربوطه
+                    // جابه‌جایی در آرایه زمین‌ها و تنظیمات سانس
                     var movedVenue = venues.splice(fromIdx, 1)[0];
-                    var movedConfig = sessionConfig.splice(fromIdx, 1)[0];
                     venues.splice(targetIdx, 0, movedVenue);
+                    var movedConfig = sessionConfig.splice(fromIdx, 1)[0];
                     sessionConfig.splice(targetIdx, 0, movedConfig);
                     saveVenues(venues);
                     saveSessionConfigToStorage();
@@ -5388,6 +5368,31 @@
         // ============================================================
 
         var hoverTimeout = null;
+        var lastFloatingTap = 0;
+
+        function handleFloatingBtnClick(e) {
+            // روی موبایل/لمس: اگر کارت باز نیست اول وضعیت را نشان بده، با ضربه دوم یا روی دسکتاپ ویرایش سانس را باز کن
+            var isTouch = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+            var card = document.getElementById('sessionHoverCard');
+            var now = Date.now();
+            if (isTouch && card && !card.classList.contains('active')) {
+                e.preventDefault();
+                e.stopPropagation();
+                showSessionCard();
+                lastFloatingTap = now;
+                // بعد از ۳ ثانیه اگر باز ماند ببند
+                clearTimeout(window.floatingCardAutoHide);
+                window.floatingCardAutoHide = setTimeout(function() {
+                    hideSessionCard();
+                }, 4000);
+                return;
+            }
+            // ضربه سریع دوم یا دسکتاپ: باز کردن ویرایش سانس
+            if (isTouch && (now - lastFloatingTap < 600)) {
+                // اجازه بده open شود
+            }
+            openSessionEditor();
+        }
 
         function showSessionCard() {
             if (hoverTimeout) { clearTimeout(hoverTimeout);
